@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Regenerated runtime outputs (keep the curated demo session and dir structure)
+outputs/logs/*.jsonl
+outputs/sessions/*.json
+outputs/rendered_levels/
+outputs/candidates/
+outputs/reports/*.md
+outputs/screenshots/
+!**/.gitkeep
+!outputs/demo_session/
+
+# OS / IDE
+.DS_Store
+.vscode/
+.cursor/
+
+# Model artifacts under models/ are intentionally tracked (they fit GitHub limits).
