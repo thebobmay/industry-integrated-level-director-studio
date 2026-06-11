@@ -87,16 +87,13 @@ def test_invalid_candidate_source_is_rejected():
 
 def test_invalid_feedback_sentiment_is_rejected():
     with pytest.raises(ValidationError):
-        FeedbackResult(
-            feedback_text="ok", sentiment="neutral", confidence=0.5, model_name="m"
-        )
+        FeedbackResult(feedback_text="ok", sentiment="neutral", model_name="m")
 
 
 def test_full_session_json_round_trip():
     feedback = FeedbackResult(
         feedback_text="The first jump felt unfair.",
         sentiment="negative",
-        confidence=0.91,
         model_name="linear_svm",
     )
     record = PlaytestRecord(

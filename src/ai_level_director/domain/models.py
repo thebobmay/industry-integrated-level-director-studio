@@ -42,14 +42,14 @@ class FeedbackResult(BaseModel):
     """Normalized result of a Project 3 feedback classification.
 
     This is a broad reception signal, positive or negative, not a complete
-    playtest analysis. ``confidence`` and ``model_name`` are recorded so the
-    workflow can route low confidence results to human review and so reports can
-    disclose which model produced the label.
+    playtest analysis. The underlying classifier is a linear SVM that returns only
+    a label and no probability, so no confidence score is recorded; fabricating
+    one would misrepresent the model. ``model_name`` is kept so reports can
+    disclose which model produced the label. See Decision 12 in the decision log.
     """
 
     feedback_text: str
     sentiment: FeedbackSentiment
-    confidence: float
     model_name: str
     label_source: str = "project3_feedback_classifier"
 
