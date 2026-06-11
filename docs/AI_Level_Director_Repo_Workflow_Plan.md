@@ -648,12 +648,12 @@ venv/
 .ipynb_checkpoints/
 
 # Regenerated runtime outputs (keep the curated demo session and dir structure)
-outputs/logs/*.jsonl
-outputs/sessions/*.json
-outputs/rendered_levels/
-outputs/candidates/
-outputs/reports/*.md
-outputs/screenshots/
+outputs/sessions/*
+outputs/logs/*
+outputs/candidates/*
+outputs/rendered_levels/*
+outputs/reports/*
+outputs/screenshots/*
 !**/.gitkeep
 !outputs/demo_session/
 
