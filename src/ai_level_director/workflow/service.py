@@ -6,8 +6,9 @@ one change, saves the updated session, and returns it. Keeping all callers behin
 this facade is what keeps the UI and notebook from touching prior project
 internals or persistence details directly.
 
-This module covers the session lifecycle and candidate management. The triage,
-playtest, and feedback commands are added once the adapter interface is in place.
+Triage and feedback are delegated to injected adapters that satisfy the interfaces
+in ``adapters.interfaces``. The service depends on those interfaces, not concrete
+adapters, so mock adapters and the real prior project adapters are interchangeable.
 """
 
 from __future__ import annotations
@@ -15,7 +16,9 @@ from __future__ import annotations
 from pathlib import Path
 from uuid import uuid4
 
-from ai_level_director.domain.models import DesignSession, LevelCandidate
+from ai_level_director.adapters.interfaces import FeedbackAdapter, TriageAdapter
+from ai_level_director.domain.events import CandidateEvent
+from ai_level_director.domain.models import DesignSession, LevelCandidate, PlaytestRecord
 from ai_level_director.storage import paths
 from ai_level_director.storage.session_store import SessionStore
 from ai_level_director.workflow.candidate_sources import (
@@ -25,6 +28,11 @@ from ai_level_director.workflow.candidate_sources import (
     save_candidate_artifacts,
     utc_now_iso,
 )
+from ai_level_director.workflow.transitions import (
+    ensure_transition,
+    state_for_feedback,
+    state_for_triage_action,
+)
 
 
 def _new_session_id() -> str:
@@ -33,15 +41,26 @@ def _new_session_id() -> str:
 
 
 class LevelDirectorService:
-    """Facade over the session store and candidate operations.
+    """Facade over the session store, candidate operations, and adapters.
 
     The output root is configurable so tests run against a temporary directory.
+    Triage and feedback adapters are injected; they default to ``None`` and the
+    corresponding commands raise if their adapter is missing.
     """
 
-    def __init__(self, output_root: Path | str = paths.DEFAULT_OUTPUT_ROOT) -> None:
+    def __init__(
+        self,
+        output_root: Path | str = paths.DEFAULT_OUTPUT_ROOT,
+        triage_adapter: TriageAdapter | None = None,
+        feedback_adapter: FeedbackAdapter | None = None,
+    ) -> None:
         """Create the service rooted at the given output directory."""
         self.output_root = Path(output_root)
         self.store = SessionStore(self.output_root)
+        self.triage_adapter = triage_adapter
+        self.feedback_adapter = feedback_adapter
+
+    # Session lifecycle ----------------------------------------------------
 
     def start_session(
         self,
@@ -71,6 +90,8 @@ class LevelDirectorService:
         """Persist a session snapshot to the store."""
         return self.store.save_session(session)
 
+    # Candidate management -------------------------------------------------
+
     def add_uploaded_candidate(
         self, session_id: str, level_text: str, title: str | None = None
     ) -> DesignSession:
@@ -92,6 +113,132 @@ class LevelDirectorService:
         )
         candidate = make_sample_candidate(level_text, candidate_id, title)
         return self._attach_candidate(session, candidate)
+
+    # Workflow commands ----------------------------------------------------
+
+    def run_triage(self, session_id: str, candidate_id: str) -> DesignSession:
+        """Triage a candidate through the triage adapter and update its state."""
+        if self.triage_adapter is None:
+            raise RuntimeError("No triage adapter configured.")
+        session = self.load_session(session_id)
+        candidate = self._get_candidate(session, candidate_id)
+
+        result = self.triage_adapter.triage(
+            design_brief=session.design_brief,
+            level_text=candidate.level_text,
+            target_difficulty=session.target_difficulty,
+            novelty_preference=session.novelty_preference,
+        )
+        new_state = state_for_triage_action(result.action)
+        ensure_transition(candidate.workflow_state, new_state)
+
+        candidate.triage_result = result
+        event = self._record_state_change(
+            session,
+            candidate,
+            new_state,
+            event_type="triaged",
+            summary=f"Triaged: {result.action} -> {new_state}.",
+            payload={"action": result.action, "readiness": result.readiness},
+        )
+        self._persist(session, event)
+        return session
+
+    def send_to_playtest(self, session_id: str, candidate_id: str) -> DesignSession:
+        """Send a ready candidate to the playtester view."""
+        session = self.load_session(session_id)
+        candidate = self._get_candidate(session, candidate_id)
+        ensure_transition(candidate.workflow_state, "sent_to_playtest")
+        event = self._record_state_change(
+            session,
+            candidate,
+            "sent_to_playtest",
+            event_type="sent_to_playtest",
+            summary=f"Candidate {candidate_id} sent to playtest.",
+        )
+        self._persist(session, event)
+        return session
+
+    def submit_feedback(
+        self, session_id: str, candidate_id: str, feedback_text: str
+    ) -> DesignSession:
+        """Submit playtester feedback, classify it, and update candidate state.
+
+        Empty or blank feedback cannot be classified, so it routes to human review
+        as an input check rather than through the classifier.
+        """
+        if self.feedback_adapter is None:
+            raise RuntimeError("No feedback adapter configured.")
+        session = self.load_session(session_id)
+        candidate = self._get_candidate(session, candidate_id)
+        ensure_transition(candidate.workflow_state, "feedback_received")
+        candidate.workflow_state = "feedback_received"
+
+        if not feedback_text.strip():
+            new_state = "human_review_needed"
+            summary = f"Empty feedback for {candidate_id}; routed to human review."
+            payload = {"classified": False}
+        else:
+            feedback_result = self.feedback_adapter.classify(feedback_text)
+            new_state = state_for_feedback(feedback_result.sentiment)
+            record = PlaytestRecord(
+                playtest_id=f"{candidate_id}-pt-{len(candidate.feedback_records) + 1}",
+                candidate_id=candidate_id,
+                submitted_at=utc_now_iso(),
+                feedback_text=feedback_text,
+                feedback_result=feedback_result,
+                status_after_feedback=new_state,
+            )
+            candidate.feedback_records.append(record)
+            summary = f"Feedback classified {feedback_result.sentiment} -> {new_state}."
+            payload = {"classified": True, "sentiment": feedback_result.sentiment}
+
+        ensure_transition("feedback_received", new_state)
+        event = self._record_state_change(
+            session, candidate, new_state, event_type="feedback_submitted",
+            summary=summary, payload=payload,
+        )
+        self._persist(session, event)
+        return session
+
+    # Internal helpers -----------------------------------------------------
+
+    def _get_candidate(self, session: DesignSession, candidate_id: str) -> LevelCandidate:
+        """Return the named candidate or raise if it is not in the session."""
+        for candidate in session.candidates:
+            if candidate.candidate_id == candidate_id:
+                return candidate
+        raise KeyError(f"No candidate '{candidate_id}' in session '{session.session_id}'.")
+
+    def _record_state_change(
+        self,
+        session: DesignSession,
+        candidate: LevelCandidate,
+        new_state: str,
+        event_type: str,
+        summary: str,
+        payload: dict | None = None,
+    ) -> CandidateEvent:
+        """Apply a state change to a candidate and append a history event to it."""
+        now = utc_now_iso()
+        candidate.workflow_state = new_state
+        candidate.updated_at = now
+        event = CandidateEvent(
+            event_id=f"{candidate.candidate_id}-evt-{len(candidate.history) + 1}",
+            timestamp=now,
+            event_type=event_type,
+            candidate_id=candidate.candidate_id,
+            summary=summary,
+            payload=payload or {},
+        )
+        candidate.history.append(event)
+        session.updated_at = now
+        return event
+
+    def _persist(self, session: DesignSession, event: CandidateEvent) -> None:
+        """Save the session snapshot and append one event to the log."""
+        self.store.save_session(session)
+        self.store.append_event(session.session_id, event)
 
     def _attach_candidate(
         self, session: DesignSession, candidate: LevelCandidate
