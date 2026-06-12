@@ -25,6 +25,7 @@ from ai_level_director.domain.events import CandidateEvent
 from ai_level_director.domain.models import DesignSession, LevelCandidate, PlaytestRecord
 from ai_level_director.storage import paths
 from ai_level_director.storage.session_store import SessionStore
+from ai_level_director.reporting.report_builder import build_session_report
 from ai_level_director.workflow.candidate_sources import (
     make_generated_candidate,
     make_sample_candidate,
@@ -244,6 +245,23 @@ class LevelDirectorService:
         )
         self._persist(session, event)
         return session
+
+    def build_session_report(self, session_id: str) -> Path:
+        """Generate the Markdown session report, save it, and return its path."""
+        session = self.load_session(session_id)
+        report = build_session_report(session)
+        target = paths.report_path(session_id, self.output_root)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(report, encoding="utf-8")
+        event = CandidateEvent(
+            event_id=f"{session_id}-report-{utc_now_iso()}",
+            timestamp=utc_now_iso(),
+            event_type="report_generated",
+            candidate_id=None,
+            summary=f"Session report generated at {target}.",
+        )
+        self.store.append_event(session_id, event)
+        return target
 
     # Internal helpers -----------------------------------------------------
 
