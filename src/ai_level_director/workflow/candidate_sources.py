@@ -126,6 +126,26 @@ def make_generated_candidate(
     )
 
 
+def make_revised_candidate(
+    level_text: str,
+    candidate_id: str,
+    parent_candidate_id: str,
+    iteration_number: int,
+    title: str | None = None,
+    created_at: str | None = None,
+) -> LevelCandidate:
+    """Create a revised candidate linked to the candidate it revises."""
+    return build_candidate(
+        level_text,
+        "revised",
+        title or f"Revision of {parent_candidate_id}",
+        candidate_id,
+        created_at,
+        parent_candidate_id=parent_candidate_id,
+        iteration_number=iteration_number,
+    )
+
+
 def save_candidate_artifacts(
     candidate: LevelCandidate,
     session_id: str,

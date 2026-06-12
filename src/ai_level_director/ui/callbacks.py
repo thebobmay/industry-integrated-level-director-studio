@@ -1,0 +1,212 @@
+"""UI callbacks.
+
+Each callback takes the LevelDirectorService explicitly, performs one command, and
+returns plain view models and a status string. They import no Gradio, so they run
+and test outside the event loop; ``app.py`` wraps them and binds them to
+components. Service errors (for example an invalid transition) are caught and
+returned as a status message rather than raised, so the UI stays responsive.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+from ai_level_director.domain.models import DesignSession
+from ai_level_director.storage import paths
+from ai_level_director.ui.view_models import (
+    candidate_board_view,
+    candidate_detail_view,
+    candidate_ids,
+    event_timeline_markdown,
+    playtest_queue_view,
+    session_summary_view,
+)
+from ai_level_director.workflow.service import LevelDirectorService
+
+_SAMPLE_DIR = Path(__file__).resolve().parents[3] / "data" / "sample_levels"
+
+
+def list_sample_levels() -> list[str]:
+    """List the names (without extension) of the bundled sample levels."""
+    return [p.stem for p in sorted(_SAMPLE_DIR.glob("*.txt"))]
+
+
+def _sample_text(name: str) -> str:
+    """Read a bundled sample level's tile text by name."""
+    return (_SAMPLE_DIR / f"{name}.txt").read_text(encoding="utf-8")
+
+
+def _views(service: LevelDirectorService, session_id: str):
+    """Return the standard refresh bundle: board, candidate ids, playtest queue."""
+    session = service.load_session(session_id)
+    return candidate_board_view(session), candidate_ids(session), playtest_queue_view(session)
+
+
+def start_session(
+    service: LevelDirectorService, brief: str, target_difficulty: str, novelty_preference: str
+):
+    """Create a session and return its id with the initial views."""
+    difficulty = None if target_difficulty in ("", "unspecified") else target_difficulty
+    novelty = None if novelty_preference in ("", "unspecified") else novelty_preference
+    if not (brief or "").strip():
+        return None, candidate_board_view_empty(), [], playtest_queue_view_empty(), "Enter a design brief first."
+    session = service.start_session(brief, difficulty, novelty)
+    board, ids, queue = _views(service, session.session_id)
+    return session.session_id, board, ids, queue, f"Started session {session.session_id}."
+
+
+_EMPTY_SESSION = DesignSession(session_id="", design_brief="", created_at="", updated_at="")
+
+
+def candidate_board_view_empty():
+    """An empty candidate board (used before a session exists)."""
+    return candidate_board_view(_EMPTY_SESSION)
+
+
+def playtest_queue_view_empty():
+    """An empty playtest queue."""
+    return playtest_queue_view(_EMPTY_SESSION)
+
+
+def _action(service, session_id, fn, success):
+    """Run a state changing service command and return the refreshed views."""
+    if not session_id:
+        board, ids, queue = _views_safe(service, session_id)
+        return board, ids, queue, "Start or load a session first."
+    try:
+        fn()
+        status = success
+    except Exception as exc:  # surfaced to the UI, never crashes the app
+        status = f"Error: {exc}"
+    board, ids, queue = _views(service, session_id)
+    return board, ids, queue, status
+
+
+def _views_safe(service, session_id):
+    """Views that tolerate a missing session id."""
+    if not session_id:
+        return candidate_board_view_empty(), [], playtest_queue_view_empty()
+    return _views(service, session_id)
+
+
+def upload_candidate(service, session_id, level_text, title):
+    """Add an uploaded candidate from pasted tile text."""
+    return _action(
+        service, session_id,
+        lambda: service.add_uploaded_candidate(session_id, level_text, title or None),
+        "Uploaded candidate added.",
+    )
+
+
+def load_sample(service, session_id, sample_name):
+    """Add a bundled sample candidate."""
+    return _action(
+        service, session_id,
+        lambda: service.add_sample_candidate(session_id, _sample_text(sample_name), sample_name),
+        f"Sample '{sample_name}' added.",
+    )
+
+
+def generate_candidates(service, session_id, n, temperature, seed):
+    """Generate candidates with the configured generator adapter."""
+    seed_val = int(seed) if seed not in (None, "") else None
+    return _action(
+        service, session_id,
+        lambda: service.add_generated_candidate(
+            session_id, n=int(n), temperature=float(temperature), seed=seed_val
+        ),
+        f"Generated {int(n)} candidate(s).",
+    )
+
+
+def run_triage(service, session_id, candidate_id):
+    """Triage a selected candidate."""
+    return _action(
+        service, session_id,
+        lambda: service.run_triage(session_id, candidate_id),
+        f"Triaged {candidate_id}.",
+    )
+
+
+def run_triage_all_drafts(service, session_id):
+    """Triage every candidate currently in the draft state."""
+    def do():
+        session = service.load_session(session_id)
+        for c in [c for c in session.candidates if c.workflow_state == "draft"]:
+            service.run_triage(session_id, c.candidate_id)
+
+    return _action(service, session_id, do, "Triaged all draft candidates.")
+
+
+def send_to_playtest(service, session_id, candidate_id):
+    """Send a ready candidate to the playtester view."""
+    return _action(
+        service, session_id,
+        lambda: service.send_to_playtest(session_id, candidate_id),
+        f"Sent {candidate_id} to playtest.",
+    )
+
+
+def submit_feedback(service, session_id, candidate_id, feedback_text):
+    """Submit playtester feedback for a candidate."""
+    return _action(
+        service, session_id,
+        lambda: service.submit_feedback(session_id, candidate_id, feedback_text),
+        f"Feedback submitted for {candidate_id}.",
+    )
+
+
+def mark_complete(service, session_id, candidate_id):
+    """Mark a candidate complete."""
+    return _action(
+        service, session_id,
+        lambda: service.mark_complete(session_id, candidate_id),
+        f"Marked {candidate_id} complete.",
+    )
+
+
+def archive_candidate(service, session_id, candidate_id):
+    """Archive a candidate."""
+    return _action(
+        service, session_id,
+        lambda: service.archive_candidate(session_id, candidate_id),
+        f"Archived {candidate_id}.",
+    )
+
+
+def create_revised_candidate(service, session_id, parent_candidate_id, revised_text, notes):
+    """Create a revised candidate from a parent."""
+    return _action(
+        service, session_id,
+        lambda: service.create_revised_candidate(
+            session_id, parent_candidate_id, revised_text, notes or ""
+        ),
+        f"Created a revision of {parent_candidate_id}.",
+    )
+
+
+def candidate_detail(service, session_id, candidate_id) -> dict:
+    """Return the detail panel blocks for a candidate."""
+    if not session_id:
+        return candidate_detail_view(_EMPTY_SESSION, None)
+    session = service.load_session(session_id)
+    return candidate_detail_view(session, candidate_id)
+
+
+def build_report(service, session_id):
+    """Generate the session report and return its text and downloadable paths."""
+    if not session_id:
+        return "", None, None, "Start or load a session first."
+    path = service.build_session_report(session_id)
+    session = service.load_session(session_id)
+    report_text = path.read_text(encoding="utf-8")
+    timeline = event_timeline_markdown(service.store.read_events(session_id))
+    session_json = str(paths.session_path(session_id, service.output_root))
+    return report_text, str(path), session_json, timeline, f"Report written to {path}."
+
+
+def session_summary(service, session_id) -> str:
+    """Return a Markdown summary of the current session."""
+    if not session_id:
+        return "_No session._"
+    return session_summary_view(service.load_session(session_id))
