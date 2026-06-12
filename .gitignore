@@ -18,6 +18,9 @@ outputs/screenshots/*
 !**/.gitkeep
 !outputs/demo_session/
 
+# Scratch / exploration (throwaway, never committed)
+scratch/
+
 # OS / IDE
 .DS_Store
 .vscode/
