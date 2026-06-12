@@ -78,3 +78,22 @@ class MockFeedbackAdapter:
             sentiment=sentiment,
             model_name="mock-feedback",
         )
+
+
+class MockGeneratorAdapter:
+    """A generator adapter that returns canned, valid level chunks instantly.
+
+    It produces deterministic 14 row by 32 column grids so the service generation
+    command can be tested without the real Project 5 model.
+    """
+
+    def generate(
+        self,
+        target_difficulty: str,
+        n: int = 1,
+        temperature: float = 1.2,
+        seed: int | None = None,
+    ) -> list[str]:
+        """Return n simple valid level chunks."""
+        chunk = "\n".join(["-" * 32] * 13 + ["X" * 32])
+        return [chunk for _ in range(n)]

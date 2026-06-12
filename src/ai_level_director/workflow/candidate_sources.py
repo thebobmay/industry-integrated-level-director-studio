@@ -108,6 +108,24 @@ def make_sample_candidate(
     )
 
 
+def make_generated_candidate(
+    level_text: str,
+    candidate_id: str,
+    title: str | None = None,
+    created_at: str | None = None,
+    generation_metadata: dict | None = None,
+) -> LevelCandidate:
+    """Create a candidate from a Project 5 generated level chunk."""
+    return build_candidate(
+        level_text,
+        "generated",
+        title or "Generated candidate",
+        candidate_id,
+        created_at,
+        generation_metadata=generation_metadata,
+    )
+
+
 def save_candidate_artifacts(
     candidate: LevelCandidate,
     session_id: str,
