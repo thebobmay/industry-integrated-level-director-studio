@@ -34,3 +34,17 @@ class FeedbackAdapter(Protocol):
     def classify(self, feedback_text: str) -> FeedbackResult:
         """Return a normalized feedback result for the text."""
         ...
+
+
+class GeneratorAdapter(Protocol):
+    """Generate candidate level chunks (Project 5)."""
+
+    def generate(
+        self,
+        target_difficulty: str,
+        n: int = 1,
+        temperature: float = 1.2,
+        seed: int | None = None,
+    ) -> list[str]:
+        """Return n generated candidate level texts for the target difficulty."""
+        ...

@@ -16,12 +16,17 @@ from __future__ import annotations
 from pathlib import Path
 from uuid import uuid4
 
-from ai_level_director.adapters.interfaces import FeedbackAdapter, TriageAdapter
+from ai_level_director.adapters.interfaces import (
+    FeedbackAdapter,
+    GeneratorAdapter,
+    TriageAdapter,
+)
 from ai_level_director.domain.events import CandidateEvent
 from ai_level_director.domain.models import DesignSession, LevelCandidate, PlaytestRecord
 from ai_level_director.storage import paths
 from ai_level_director.storage.session_store import SessionStore
 from ai_level_director.workflow.candidate_sources import (
+    make_generated_candidate,
     make_sample_candidate,
     make_uploaded_candidate,
     next_candidate_id,
@@ -53,12 +58,14 @@ class LevelDirectorService:
         output_root: Path | str = paths.DEFAULT_OUTPUT_ROOT,
         triage_adapter: TriageAdapter | None = None,
         feedback_adapter: FeedbackAdapter | None = None,
+        generator_adapter: GeneratorAdapter | None = None,
     ) -> None:
         """Create the service rooted at the given output directory."""
         self.output_root = Path(output_root)
         self.store = SessionStore(self.output_root)
         self.triage_adapter = triage_adapter
         self.feedback_adapter = feedback_adapter
+        self.generator_adapter = generator_adapter
 
     # Session lifecycle ----------------------------------------------------
 
@@ -113,6 +120,43 @@ class LevelDirectorService:
         )
         candidate = make_sample_candidate(level_text, candidate_id, title)
         return self._attach_candidate(session, candidate)
+
+    def add_generated_candidate(
+        self,
+        session_id: str,
+        target_difficulty: str | None = None,
+        n: int = 1,
+        temperature: float = 1.2,
+        seed: int | None = None,
+    ) -> DesignSession:
+        """Generate n candidates with the generator adapter and add them.
+
+        The difficulty defaults to the session's target difficulty, then to
+        medium. Generation provenance is recorded on each candidate so reports can
+        disclose that the content is a generated draft.
+        """
+        if self.generator_adapter is None:
+            raise RuntimeError("No generator adapter configured.")
+        session = self.load_session(session_id)
+        difficulty = target_difficulty or session.target_difficulty or "medium"
+        level_texts = self.generator_adapter.generate(
+            difficulty, n=n, temperature=temperature, seed=seed
+        )
+        for level_text in level_texts:
+            candidate_id = next_candidate_id(
+                [c.candidate_id for c in session.candidates], "generated"
+            )
+            metadata = {
+                "source_project": "Project 5",
+                "target_difficulty": difficulty,
+                "temperature": temperature,
+                "seed": seed,
+            }
+            candidate = make_generated_candidate(
+                level_text, candidate_id, generation_metadata=metadata
+            )
+            self._attach_candidate(session, candidate)
+        return session
 
     # Workflow commands ----------------------------------------------------
 
