@@ -25,8 +25,10 @@ from ai_level_director.domain.events import CandidateEvent
 from ai_level_director.domain.models import DesignSession, LevelCandidate, PlaytestRecord
 from ai_level_director.storage import paths
 from ai_level_director.storage.session_store import SessionStore
+from ai_level_director.reporting.report_builder import build_session_report
 from ai_level_director.workflow.candidate_sources import (
     make_generated_candidate,
+    make_revised_candidate,
     make_sample_candidate,
     make_uploaded_candidate,
     next_candidate_id,
@@ -34,10 +36,16 @@ from ai_level_director.workflow.candidate_sources import (
     utc_now_iso,
 )
 from ai_level_director.workflow.transitions import (
+    InvalidTransitionError,
     ensure_transition,
     state_for_feedback,
     state_for_triage_action,
 )
+
+# Designer override actions (mark complete, archive) may act from any non terminal
+# state, since they are explicit human decisions rather than automated lifecycle
+# steps. These are the terminal states they cannot act on.
+_TERMINAL_STATES = {"complete", "archived", "structural_rejected"}
 
 
 def _new_session_id() -> str:
@@ -244,6 +252,79 @@ class LevelDirectorService:
         )
         self._persist(session, event)
         return session
+
+    def mark_complete(self, session_id: str, candidate_id: str) -> DesignSession:
+        """Mark a candidate complete. A designer override, allowed unless terminal."""
+        session = self.load_session(session_id)
+        candidate = self._get_candidate(session, candidate_id)
+        if candidate.workflow_state in _TERMINAL_STATES:
+            raise InvalidTransitionError(
+                f"Cannot complete a candidate already in '{candidate.workflow_state}'."
+            )
+        event = self._record_state_change(
+            session, candidate, "complete", event_type="completed",
+            summary=f"Candidate {candidate_id} marked complete (designer override).",
+        )
+        self._persist(session, event)
+        return session
+
+    def archive_candidate(self, session_id: str, candidate_id: str) -> DesignSession:
+        """Archive a candidate the designer is setting aside. A designer override."""
+        session = self.load_session(session_id)
+        candidate = self._get_candidate(session, candidate_id)
+        if candidate.workflow_state == "archived":
+            raise InvalidTransitionError("Candidate is already archived.")
+        event = self._record_state_change(
+            session, candidate, "archived", event_type="archived",
+            summary=f"Candidate {candidate_id} archived.",
+        )
+        self._persist(session, event)
+        return session
+
+    def create_revised_candidate(
+        self,
+        session_id: str,
+        parent_candidate_id: str,
+        revised_level_text: str,
+        notes: str = "",
+    ) -> DesignSession:
+        """Create a new revised candidate linked to its parent and add it.
+
+        The revision is a new draft candidate carrying the parent id and an
+        incremented iteration number, so the iteration history is preserved rather
+        than overwriting the original.
+        """
+        session = self.load_session(session_id)
+        parent = self._get_candidate(session, parent_candidate_id)
+        candidate_id = next_candidate_id(
+            [c.candidate_id for c in session.candidates], "revised"
+        )
+        candidate = make_revised_candidate(
+            revised_level_text,
+            candidate_id,
+            parent_candidate_id=parent_candidate_id,
+            iteration_number=parent.iteration_number + 1,
+        )
+        if notes:
+            session.session_notes.append(f"{candidate_id}: {notes}")
+        return self._attach_candidate(session, candidate)
+
+    def build_session_report(self, session_id: str) -> Path:
+        """Generate the Markdown session report, save it, and return its path."""
+        session = self.load_session(session_id)
+        report = build_session_report(session)
+        target = paths.report_path(session_id, self.output_root)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(report, encoding="utf-8")
+        event = CandidateEvent(
+            event_id=f"{session_id}-report-{utc_now_iso()}",
+            timestamp=utc_now_iso(),
+            event_type="report_generated",
+            candidate_id=None,
+            summary=f"Session report generated at {target}.",
+        )
+        self.store.append_event(session_id, event)
+        return target
 
     # Internal helpers -----------------------------------------------------
 

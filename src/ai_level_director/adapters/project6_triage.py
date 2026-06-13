@@ -13,7 +13,9 @@ Live triage calls an OpenAI model and needs ``OPENAI_API_KEY`` (and optionally
 
 from __future__ import annotations
 
+import asyncio
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from ai_level_director.domain.models import TriageResult
@@ -125,13 +127,31 @@ class Project6TriageAdapter:
         """
         brief = self._augment_brief(design_brief, target_difficulty, novelty_preference)
         request = self._TriageRequest(brief_text=brief, candidate_level=level_text)
-        session = self._triage_candidate(
-            request,
-            self._reference_levels,
-            model=self.model,
-            model_settings=self.model_settings,
-        )
-        return map_session_to_result(session)
+        return map_session_to_result(self._run_pass(request))
+
+    def _run_pass(self, request):
+        """Run the Project 6 triage pass, off thread if an event loop is running.
+
+        Project 6 uses Pydantic AI's ``run_sync``, which cannot run inside an
+        already running event loop (a Jupyter kernel, for example). When a loop is
+        running, the pass executes in a worker thread that gets its own fresh loop;
+        otherwise it runs directly (scripts and the Gradio worker threads). This
+        adapts Project 6's synchronous API to async callers without modifying it.
+        """
+        def _call():
+            return self._triage_candidate(
+                request,
+                self._reference_levels,
+                model=self.model,
+                model_settings=self.model_settings,
+            )
+
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            return _call()
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            return executor.submit(_call).result()
 
     @staticmethod
     def _augment_brief(
