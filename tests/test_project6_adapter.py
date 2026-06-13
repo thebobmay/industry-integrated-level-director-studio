@@ -78,6 +78,39 @@ def test_decision_falls_back_to_recommendation_action():
     assert result.action == "recommend_revision"
 
 
+def _has_running_loop() -> bool:
+    import asyncio
+
+    try:
+        asyncio.get_running_loop()
+        return True
+    except RuntimeError:
+        return False
+
+
+def test_triage_dispatches_off_a_running_event_loop():
+    # Inside a running loop (like a Jupyter kernel), the pass must run in a worker
+    # thread that has no running loop, so Pydantic AI run_sync works. The P6 pass is
+    # stubbed so no API call is made.
+    import asyncio
+
+    adapter = Project6TriageAdapter()
+    captured = {}
+
+    def fake_pass(request, refs, model=None, model_settings=None):
+        captured["loop_in_worker"] = _has_running_loop()
+        return fake_session()
+
+    adapter._triage_candidate = fake_pass
+
+    async def driver():
+        return adapter.triage("brief", "----\nXXXX")
+
+    result = asyncio.run(driver())
+    assert result.action == "recommend_revision"  # mapped from the fake session
+    assert captured["loop_in_worker"] is False  # ran in a fresh thread, no loop
+
+
 def test_real_adapter_constructs_offline():
     # Constructs the real adapter: imports the vendored Project 6 and loads the
     # reference library. No API call is made.
