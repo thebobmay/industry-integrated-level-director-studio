@@ -63,6 +63,14 @@ class MockTriageAdapter:
             ),
             playtest_questions=["(mock) Does the first jump feel fair?"],
             raw_payload={"mock": True, "action": self.action},
+            transcript_text=(
+                f"# Triage Transcript (mock)\n\nDeterministic transcript for action "
+                f"'{self.action}'.\n"
+            ),
+            report_text=(
+                f"# Triage Report (mock)\n\nDeterministic report for action "
+                f"'{self.action}'.\n"
+            ),
         )
 
 

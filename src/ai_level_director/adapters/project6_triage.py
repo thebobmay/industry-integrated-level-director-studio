@@ -60,7 +60,9 @@ def map_session_to_result(session) -> TriageResult:
     The final action is the session decision (post safety floor), falling back to
     the recommendation's action. Revision edits and the prescription playtest
     question are flattened into the result's lists. The full Project 6 session is
-    kept in ``raw_payload`` (minus the bulky transcript) for auditing.
+    kept in ``raw_payload`` (minus the bulky transcript) for auditing. This stays a
+    pure field mapping; the deliberation transcript and report are rendered in the
+    adapter's ``triage`` method, where Project 6 is on the path.
     """
     recommendation = session.recommendation
     prescription = recommendation.prescription if recommendation else None
@@ -83,6 +85,20 @@ def map_session_to_result(session) -> TriageResult:
         playtest_questions=playtest_questions,
         raw_payload=session.model_dump(mode="json", exclude={"transcript"}),
     )
+
+
+def _render_artifacts(session) -> tuple[str | None, str | None]:
+    """Render the deliberation transcript and designer report from a triage session.
+
+    These are supplementary observability artifacts. A rendering failure returns
+    ``None`` so the triage decision itself is never lost to a reporting problem.
+    """
+    try:
+        from src.report import format_transcript, generate_report  # vendored Project 6
+
+        return format_transcript(session), generate_report(session)
+    except Exception:
+        return None, None
 
 
 class Project6TriageAdapter:
@@ -127,7 +143,10 @@ class Project6TriageAdapter:
         """
         brief = self._augment_brief(design_brief, target_difficulty, novelty_preference)
         request = self._TriageRequest(brief_text=brief, candidate_level=level_text)
-        return map_session_to_result(self._run_pass(request))
+        session = self._run_pass(request)
+        result = map_session_to_result(session)
+        result.transcript_text, result.report_text = _render_artifacts(session)
+        return result
 
     def _run_pass(self, request):
         """Run the Project 6 triage pass, off thread if an event loop is running.

@@ -193,6 +193,38 @@ def candidate_detail(service, session_id, candidate_id) -> dict:
     return candidate_detail_view(session, candidate_id)
 
 
+def _read_artifact(path: str | None) -> str:
+    """Read a saved text artifact for display, returning '' if it is missing."""
+    if not path:
+        return ""
+    target = Path(path)
+    return target.read_text(encoding="utf-8") if target.is_file() else ""
+
+
+def triage_artifacts(service, session_id, candidate_id) -> dict:
+    """Return the saved triage report and deliberation transcript for a candidate.
+
+    Reads the artifacts the triage run persisted so the Candidate Detail view can
+    display them and offer them for download. Paths are returned only when the file
+    exists, and texts are empty when a candidate has not been triaged. This is how a
+    reviewer inspects the reasoning behind a triage recommendation.
+    """
+    empty = {"report_text": "", "report_path": None, "transcript_text": "", "transcript_path": None}
+    if not session_id or not candidate_id:
+        return empty
+    session = service.load_session(session_id)
+    candidate = next((c for c in session.candidates if c.candidate_id == candidate_id), None)
+    if candidate is None or candidate.triage_result is None:
+        return empty
+    result = candidate.triage_result
+    return {
+        "report_text": _read_artifact(result.report_path),
+        "report_path": result.report_path if _read_artifact(result.report_path) else None,
+        "transcript_text": _read_artifact(result.transcript_path),
+        "transcript_path": result.transcript_path if _read_artifact(result.transcript_path) else None,
+    }
+
+
 def build_report(service, session_id):
     """Generate the session report and return its text and downloadable paths."""
     if not session_id:

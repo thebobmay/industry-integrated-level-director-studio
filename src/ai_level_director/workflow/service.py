@@ -22,7 +22,12 @@ from ai_level_director.adapters.interfaces import (
     TriageAdapter,
 )
 from ai_level_director.domain.events import CandidateEvent
-from ai_level_director.domain.models import DesignSession, LevelCandidate, PlaytestRecord
+from ai_level_director.domain.models import (
+    DesignSession,
+    LevelCandidate,
+    PlaytestRecord,
+    TriageResult,
+)
 from ai_level_director.storage import paths
 from ai_level_director.storage.session_store import SessionStore
 from ai_level_director.reporting.report_builder import build_session_report
@@ -184,14 +189,21 @@ class LevelDirectorService:
         new_state = state_for_triage_action(result.action)
         ensure_transition(candidate.workflow_state, new_state)
 
+        self._save_triage_artifacts(session.session_id, candidate, result)
         candidate.triage_result = result
+
+        payload = {"action": result.action, "readiness": result.readiness}
+        if result.transcript_path:
+            payload["transcript_path"] = result.transcript_path
+        if result.report_path:
+            payload["report_path"] = result.report_path
         event = self._record_state_change(
             session,
             candidate,
             new_state,
             event_type="triaged",
             summary=f"Triaged: {result.action} -> {new_state}.",
-            payload={"action": result.action, "readiness": result.readiness},
+            payload=payload,
         )
         self._persist(session, event)
         return session
@@ -327,6 +339,32 @@ class LevelDirectorService:
         return target
 
     # Internal helpers -----------------------------------------------------
+
+    def _save_triage_artifacts(
+        self, session_id: str, candidate: LevelCandidate, result: TriageResult
+    ) -> None:
+        """Persist the triage transcript and report, recording their paths on the result.
+
+        The agent's full deliberation is written to its own file so any triage
+        recommendation can be audited later. The iteration number is the count of
+        prior triage runs on this candidate plus one, so repeated runs each leave a
+        separate transcript instead of overwriting one another.
+        """
+        iteration = sum(1 for e in candidate.history if e.event_type == "triaged") + 1
+        if result.transcript_text:
+            target = paths.triage_transcript_path(
+                session_id, candidate.candidate_id, iteration, self.output_root
+            )
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(result.transcript_text, encoding="utf-8")
+            result.transcript_path = str(target)
+        if result.report_text:
+            target = paths.triage_report_path(
+                session_id, candidate.candidate_id, iteration, self.output_root
+            )
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(result.report_text, encoding="utf-8")
+            result.report_path = str(target)
 
     def _get_candidate(self, session: DesignSession, candidate_id: str) -> LevelCandidate:
         """Return the named candidate or raise if it is not in the session."""

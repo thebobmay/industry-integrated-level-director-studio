@@ -35,3 +35,21 @@ def rendered_preview_path(session_id: str, candidate_id: str, root: Path = DEFAU
 def report_path(session_id: str, root: Path = DEFAULT_OUTPUT_ROOT) -> Path:
     """Return the path to a session's Markdown report."""
     return root / "reports" / f"{session_id}_report.md"
+
+
+def triage_transcript_path(
+    session_id: str, candidate_id: str, iteration: int, root: Path = DEFAULT_OUTPUT_ROOT
+) -> Path:
+    """Return the path to a triage run's full deliberation transcript.
+
+    The iteration number keeps repeated triage runs on the same candidate from
+    overwriting each other, so every pass leaves its own auditable transcript.
+    """
+    return root / "triage_transcripts" / session_id / f"{candidate_id}-r{iteration}.md"
+
+
+def triage_report_path(
+    session_id: str, candidate_id: str, iteration: int, root: Path = DEFAULT_OUTPUT_ROOT
+) -> Path:
+    """Return the path to a triage run's designer facing report."""
+    return root / "triage_reports" / session_id / f"{candidate_id}-r{iteration}.md"

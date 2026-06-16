@@ -26,6 +26,11 @@ implementation in `src/ai_level_director/`.
   candidate state machine it delegates to.
 - Project 6 remains the single candidate triage authority. Its validity, difficulty,
   novelty, and pacing reasoning is not duplicated anywhere in Project 7.
+- Each triage run persists the agent's full deliberation transcript and a designer
+  facing report to their own files, and the `triaged` event records the paths, so any
+  recommendation can be audited. This is Project 6 specific; the single shot generator
+  and classifier are observable through provenance (parameters, label, model name)
+  rather than a transcript.
 - Project 3 runs only after a candidate is sent to playtest. It returns a sentiment
   label only, positive or negative, with no probability or confidence score.
 - Project 5 provides candidate drafts, not final production ready content. Its

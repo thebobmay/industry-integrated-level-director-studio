@@ -35,9 +35,10 @@ sequenceDiagram
     D->>UI: Run triage on the selected candidate
     UI->>S: run_triage(session_id, candidate_id)
     S->>P6: triage(brief, level_text, target_difficulty, novelty)
-    P6-->>S: action + rationale + warnings + playtest questions
+    P6-->>S: action + rationale + warnings + questions + transcript + report
     S->>S: state_for_triage_action + ensure_transition
-    S->>Store: update candidate state + log event
+    S->>Store: save triage transcript + report artifacts
+    S->>Store: update candidate state + log event (with artifact paths)
 
     alt Candidate ready (ready_for_playtest or derivative_review_needed)
         D->>UI: Send to playtest
@@ -67,3 +68,7 @@ sequenceDiagram
   classifier.
 - Triage and feedback are reached only through adapters, so the same sequence runs
   against mock adapters or the real prior projects without changing the service.
+- Each triage run also persists the agent's full deliberation transcript and a designer
+  facing report as their own files, and the `triaged` event records their paths. The
+  event log stays a scannable audit index that links to the full reasoning behind every
+  triage recommendation.
