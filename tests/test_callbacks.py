@@ -63,6 +63,27 @@ def test_generate_then_triage(tmp_path):
     assert state == "ready_for_playtest"
 
 
+def test_triage_artifacts_returns_saved_files(tmp_path):
+    service = make_service(tmp_path)
+    sid, *_ = cb.start_session(service, "brief", "easy", "")
+    cb.upload_candidate(service, sid, LEVEL, "L")
+    cb.run_triage(service, sid, "U-001")
+
+    arts = cb.triage_artifacts(service, sid, "U-001")
+    assert arts["transcript_path"] and arts["transcript_text"]
+    assert arts["report_path"] and arts["report_text"]
+
+
+def test_triage_artifacts_empty_before_triage(tmp_path):
+    service = make_service(tmp_path)
+    sid, *_ = cb.start_session(service, "brief", "easy", "")
+    cb.upload_candidate(service, sid, LEVEL, "L")
+
+    arts = cb.triage_artifacts(service, sid, "U-001")
+    assert arts["transcript_path"] is None and arts["transcript_text"] == ""
+    assert arts["report_path"] is None
+
+
 def test_full_loop_to_complete(tmp_path):
     service = make_service(tmp_path, action="accept_for_playtest")
     sid, *_ = cb.start_session(service, "brief", "easy", "")

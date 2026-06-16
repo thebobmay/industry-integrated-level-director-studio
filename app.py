@@ -245,6 +245,17 @@ def build_app() -> gr.Blocks:
 
                 candidate = find_candidate(session, cid) if cid else None
                 if candidate:
+                    arts = cb.triage_artifacts(_get_service(eng), sid, cid)
+                    if arts["report_path"] or arts["transcript_path"]:
+                        gr.Markdown("### Triage deliberation and report")
+                        if arts["report_path"]:
+                            with gr.Accordion("Triage report", open=False):
+                                gr.Markdown(arts["report_text"])
+                                gr.File(value=arts["report_path"], label="Download report (.md)", interactive=False)
+                        if arts["transcript_path"]:
+                            with gr.Accordion("Agent deliberation transcript", open=False):
+                                gr.Code(arts["transcript_text"], label="Transcript")
+                                gr.File(value=arts["transcript_path"], label="Download transcript (.md)", interactive=False)
                     if candidate.level_path:
                         gr.File(value=candidate.level_path, label="Download level text", interactive=False)
                     gr.Markdown("### Create a revised candidate")

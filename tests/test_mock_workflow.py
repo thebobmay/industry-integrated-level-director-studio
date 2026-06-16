@@ -8,6 +8,8 @@ state machine, not model behavior.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from ai_level_director.adapters.mocks import MockFeedbackAdapter, MockTriageAdapter
@@ -110,6 +112,45 @@ def test_empty_feedback_routes_to_human_review(tmp_path):
     candidate = session.candidates[0]
     assert candidate.workflow_state == "human_review_needed"
     assert candidate.feedback_records == []  # nothing was classified
+
+
+def test_triage_persists_transcript_and_report(tmp_path):
+    service = make_service(tmp_path, action="accept_for_playtest")
+    seeded_session(service)
+    session = service.run_triage("S1", "U-001")
+
+    result = session.candidates[0].triage_result
+    # Paths are recorded and the artifacts exist on disk.
+    assert result.transcript_path is not None
+    assert result.report_path is not None
+    transcript = Path(result.transcript_path)
+    report = Path(result.report_path)
+    assert transcript.is_file() and transcript.read_text(encoding="utf-8").strip()
+    assert report.is_file() and report.read_text(encoding="utf-8").strip()
+
+    # The triaged event indexes the transcript so the audit trail links to it.
+    triaged = [e for e in service.store.read_events("S1") if e.event_type == "triaged"][0]
+    assert triaged.payload["transcript_path"] == result.transcript_path
+    assert triaged.payload["report_path"] == result.report_path
+
+    # The full transcript text is not bloated into the session snapshot; only the
+    # path persists, and the saved file is the record.
+    reloaded = service.load_session("S1").candidates[0].triage_result
+    assert reloaded.transcript_path == result.transcript_path
+    assert reloaded.transcript_text is None
+
+
+def test_repeated_triage_writes_separate_transcripts(tmp_path):
+    # A revision returns to draft, so the parent and its revision each triage and
+    # must not overwrite each other's transcript.
+    service = make_service(tmp_path, action="recommend_revision")
+    seeded_session(service)
+    service.run_triage("S1", "U-001")  # U-001 -> revision_needed
+    service.create_revised_candidate("S1", "U-001", LEVEL)
+    session = service.run_triage("S1", "R-001")
+
+    paths_seen = {c.triage_result.transcript_path for c in session.candidates if c.triage_result}
+    assert len(paths_seen) == 2  # distinct transcript files
 
 
 def test_full_happy_path_event_log(tmp_path):

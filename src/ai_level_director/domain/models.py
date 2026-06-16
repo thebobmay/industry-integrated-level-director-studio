@@ -37,6 +37,13 @@ class TriageResult(BaseModel):
     report_path: str | None = None
     raw_payload: dict = Field(default_factory=dict)
 
+    # Rendered deliberation text carried from the adapter to the service, which
+    # writes it to a file and records the path above. Excluded from serialization
+    # so the full transcript never bloats the session JSON snapshot; the saved file
+    # is the persistent record.
+    transcript_text: str | None = Field(default=None, exclude=True)
+    report_text: str | None = Field(default=None, exclude=True)
+
 
 class FeedbackResult(BaseModel):
     """Normalized result of a Project 3 feedback classification.
