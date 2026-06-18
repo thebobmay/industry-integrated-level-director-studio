@@ -226,16 +226,26 @@ def build_app() -> gr.Blocks:
                                             )
 
         with gr.Tab("Candidate Detail"):
+            # The candidate selector and the detail body are rendered separately on
+            # purpose. The selector does not depend on selected_detail_id, so choosing
+            # a candidate updates only the body and never tears down the dropdown that
+            # fired the change. The body depends on selected_detail_id and re-renders
+            # on selection. Combining them caused the dropdown to lock after actions
+            # that bumped the refresh tick (for example submitting playtest feedback).
+            @gr.render(inputs=[session_id, refresh_tick, engine])
+            def render_detail_selector(sid, tick, eng):
+                if not sid:
+                    return
+                ids = [c.candidate_id for c in _get_service(eng).load_session(sid).candidates]
+                dd = gr.Dropdown(ids, label="Candidate", value=None)
+                dd.change(lambda v: v, dd, selected_detail_id)
+
             @gr.render(inputs=[session_id, refresh_tick, selected_detail_id, engine])
             def render_detail(sid, tick, cid, eng):
                 if not sid:
                     gr.Markdown("_No session yet._")
                     return
                 session = _get_service(eng).load_session(sid)
-                ids = [c.candidate_id for c in session.candidates]
-                dd = gr.Dropdown(ids, value=cid if cid in ids else None, label="Candidate")
-                dd.change(lambda v: v, dd, selected_detail_id)
-
                 detail = candidate_detail_view(session, cid)
                 gr.Markdown(detail["metadata_markdown"])
                 gr.Code(detail["raw_level_text"], label="Level tiles")
