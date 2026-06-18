@@ -72,7 +72,8 @@ Environment variables (see `.env.example`):
 - `OPENAI_API_KEY` , credentials for the Agentic AI triage agent (live mode only).
 - `TRIAGE_MODEL` , model identifier for the triage agent, in provider:model form.
 - `OPENAI_BASE_URL` , optional override for a compatible provider.
-- `AILD_MODE` , `live` calls the real prior projects, `cached` replays stored outputs.
+
+There is no offline environment switch. For a keyless run, launch `python app.py` and set the engine toggle to Mock, or run `pytest`.
 
 Run the pieces:
 
