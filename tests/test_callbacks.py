@@ -84,6 +84,26 @@ def test_triage_artifacts_empty_before_triage(tmp_path):
     assert arts["report_path"] is None
 
 
+def test_detail_switches_between_candidates_after_playtest(tmp_path):
+    # Regression for the Candidate Detail lock: after a playtest loop bumps state,
+    # selecting either candidate must still return that candidate's own detail. The
+    # UI selector is rendered independently of the selection so it never locks; this
+    # guards the data path it feeds.
+    service = make_service(tmp_path)
+    sid, *_ = cb.start_session(service, "brief", "easy", "")
+    cb.upload_candidate(service, sid, LEVEL, "First")
+    cb.upload_candidate(service, sid, LEVEL, "Second")
+    cb.run_triage(service, sid, "U-001")
+    cb.send_to_playtest(service, sid, "U-001")
+    cb.submit_feedback(service, sid, "U-001", "Fun and fair!")
+
+    first = cb.candidate_detail(service, sid, "U-001")
+    second = cb.candidate_detail(service, sid, "U-002")
+    assert "U-001" in first["metadata_markdown"]
+    assert "U-002" in second["metadata_markdown"]
+    assert first["metadata_markdown"] != second["metadata_markdown"]
+
+
 def test_full_loop_to_complete(tmp_path):
     service = make_service(tmp_path, action="accept_for_playtest")
     sid, *_ = cb.start_session(service, "brief", "easy", "")
