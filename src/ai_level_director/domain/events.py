@@ -24,6 +24,7 @@ CandidateEventType = Literal[
     "completed",
     "archived",
     "report_generated",
+    "brief_updated",
 ]
 
 

@@ -36,6 +36,16 @@ def make_session() -> DesignSession:
     )
 
 
+def test_list_sessions_empty_and_populated(tmp_path):
+    store = SessionStore(tmp_path)
+    assert store.list_sessions() == []
+    for sid in ("S-001", "S-002"):
+        s = make_session()
+        s.session_id = sid
+        store.save_session(s)
+    assert set(store.list_sessions()) == {"S-001", "S-002"}
+
+
 def make_event(event_id: str, event_type="created", summary="created") -> CandidateEvent:
     """Build a candidate event for event log tests."""
     return CandidateEvent(

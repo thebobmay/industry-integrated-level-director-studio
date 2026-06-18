@@ -28,27 +28,29 @@ TRIAGE_ACTION_TO_STATE: dict[str, CandidateState] = {
 }
 
 
+# The six states a triage pass can produce. Defined from the action map so the two
+# never drift apart.
+TRIAGE_OUTCOME_STATES: set[CandidateState] = set(TRIAGE_ACTION_TO_STATE.values())
+
 # Allowed transitions between candidate states. A transition not listed here is
 # rejected. Keys are the current state; values are the states reachable from it.
 # Triage moves a draft candidate directly to one of the six mapped states above,
 # so "triaged" is reserved and not used as a destination.
+#
+# The three soft pre playtest states (clarification_needed, revision_needed,
+# human_review_needed) also allow the triage outcome states, so a candidate can be
+# re-triaged in place after the designer edits the brief or the candidate. This is
+# what lets a clarification request be resolved without abandoning the candidate.
 ALLOWED_TRANSITIONS: dict[CandidateState, set[CandidateState]] = {
-    "draft": {
-        "ready_for_playtest",
-        "revision_needed",
-        "clarification_needed",
-        "structural_rejected",
-        "derivative_review_needed",
-        "human_review_needed",
-    },
+    "draft": set(TRIAGE_OUTCOME_STATES),
     "triaged": set(),
     "ready_for_playtest": {"sent_to_playtest", "archived"},
     "derivative_review_needed": {"sent_to_playtest", "archived", "human_review_needed"},
     "sent_to_playtest": {"feedback_received"},
     "feedback_received": {"complete", "revision_needed", "human_review_needed"},
-    "revision_needed": {"draft", "archived"},
-    "clarification_needed": {"draft", "archived"},
-    "human_review_needed": {"draft", "archived"},
+    "revision_needed": {"draft", "archived"} | TRIAGE_OUTCOME_STATES,
+    "clarification_needed": {"draft", "archived"} | TRIAGE_OUTCOME_STATES,
+    "human_review_needed": {"draft", "archived"} | TRIAGE_OUTCOME_STATES,
     "structural_rejected": {"archived"},
     "complete": {"archived"},
     "archived": set(),

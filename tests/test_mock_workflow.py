@@ -153,6 +153,52 @@ def test_repeated_triage_writes_separate_transcripts(tmp_path):
     assert len(paths_seen) == 2  # distinct transcript files
 
 
+def test_named_session_slugs_id_and_keeps_name(tmp_path):
+    service = make_service(tmp_path)
+    session = service.start_session("An easy opener.", session_name="My Easy Opener!")
+    assert session.session_id == "my-easy-opener"
+    assert session.session_name == "My Easy Opener!"
+
+
+def test_named_sessions_stay_unique(tmp_path):
+    service = make_service(tmp_path)
+    a = service.start_session("brief", session_name="Opener")
+    b = service.start_session("brief", session_name="Opener")
+    assert a.session_id == "opener"
+    assert b.session_id == "opener-2"  # never overwrites the first
+
+
+def test_unnamed_session_falls_back_to_auto_id(tmp_path):
+    service = make_service(tmp_path)
+    session = service.start_session("brief")
+    assert session.session_id.startswith("session-")
+    assert session.session_name == session.session_id
+
+
+def test_update_brief_and_retriage(tmp_path):
+    # A clarification_needed candidate can be re-triaged after the brief is edited,
+    # without creating a new candidate. Use one mock action to reach the soft state,
+    # then a re-pointed adapter to re-triage to a ready state.
+    service = make_service(tmp_path, action="request_clarification")
+    seeded_session(service)
+    session = service.run_triage("S1", "U-001")
+    assert session.candidates[0].workflow_state == "clarification_needed"
+
+    service.update_session_brief("S1", "A clearer, easy opening segment.", "easy", "balanced")
+    reloaded = service.load_session("S1")
+    assert reloaded.design_brief == "A clearer, easy opening segment."
+
+    # Re-triage in place (swap the adapter to a ready outcome) from the soft state.
+    service.triage_adapter = MockTriageAdapter(action="accept_for_playtest")
+    session = service.run_triage("S1", "U-001")
+    assert session.candidates[0].workflow_state == "ready_for_playtest"
+
+    # The brief edit and both triage runs are all in the event log.
+    events = [e.event_type for e in service.store.read_events("S1")]
+    assert events.count("triaged") == 2
+    assert "brief_updated" in events
+
+
 def test_full_happy_path_event_log(tmp_path):
     service = make_service(tmp_path, action="accept_for_playtest")
     seeded_session(service)

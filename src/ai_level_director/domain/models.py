@@ -112,6 +112,7 @@ class DesignSession(BaseModel):
 
     session_id: str
     project_name: str = "AI Level Director Studio"
+    session_name: str | None = None
     design_brief: str
     target_difficulty: str | None = None
     novelty_preference: str | None = None

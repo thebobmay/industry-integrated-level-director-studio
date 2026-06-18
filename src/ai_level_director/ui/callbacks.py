@@ -43,19 +43,78 @@ def _views(service: LevelDirectorService, session_id: str):
 
 
 def start_session(
-    service: LevelDirectorService, brief: str, target_difficulty: str, novelty_preference: str
+    service: LevelDirectorService,
+    brief: str,
+    target_difficulty: str,
+    novelty_preference: str,
+    session_name: str = "",
 ):
     """Create a session and return its id with the initial views."""
     difficulty = None if target_difficulty in ("", "unspecified") else target_difficulty
     novelty = None if novelty_preference in ("", "unspecified") else novelty_preference
     if not (brief or "").strip():
         return None, candidate_board_view_empty(), [], playtest_queue_view_empty(), "Enter a design brief first."
-    session = service.start_session(brief, difficulty, novelty)
+    session = service.start_session(brief, difficulty, novelty, session_name=session_name or None)
     board, ids, queue = _views(service, session.session_id)
-    return session.session_id, board, ids, queue, f"Started session {session.session_id}."
+    return session.session_id, board, ids, queue, f"Started session '{session.session_name}'."
 
 
 _EMPTY_SESSION = DesignSession(session_id="", design_brief="", created_at="", updated_at="")
+
+
+def list_saved_sessions(service: LevelDirectorService) -> list[str]:
+    """Return the ids of saved sessions, newest first, for the load control."""
+    return service.store.list_sessions()
+
+
+def list_saved_session_choices(service: LevelDirectorService) -> list[tuple[str, str]]:
+    """Return (label, id) pairs for the load dropdown, labeled by friendly name.
+
+    The label shows the session name, with the id appended when they differ, so a
+    named session reads clearly while still loading by its stable id.
+    """
+    choices: list[tuple[str, str]] = []
+    for sid in service.store.list_sessions():
+        try:
+            name = service.load_session(sid).session_name or sid
+        except Exception:
+            name = sid
+        label = sid if name == sid else f"{name} ({sid})"
+        choices.append((label, sid))
+    return choices
+
+
+def load_existing_session(service: LevelDirectorService, session_id: str):
+    """Load a saved session and return its id with the initial views."""
+    if not session_id:
+        return None, candidate_board_view_empty(), [], playtest_queue_view_empty(), "Pick a session to load."
+    if not service.store.session_exists(session_id):
+        return None, candidate_board_view_empty(), [], playtest_queue_view_empty(), f"Session {session_id} not found."
+    board, ids, queue = _views(service, session_id)
+    return session_id, board, ids, queue, f"Loaded session {session_id}."
+
+
+def cancel_session():
+    """Clear the workspace back to no active session."""
+    return None, candidate_board_view_empty(), [], playtest_queue_view_empty(), "Session cleared. Start or load a session."
+
+
+def update_brief(
+    service: LevelDirectorService, session_id: str, brief: str, target_difficulty: str, novelty_preference: str
+):
+    """Update the session brief and targets, then return refreshed views."""
+    if not session_id:
+        return candidate_board_view_empty(), [], playtest_queue_view_empty(), "Start or load a session first."
+    if not (brief or "").strip():
+        board, ids, queue = _views(service, session_id)
+        return board, ids, queue, "Enter a brief before updating."
+    difficulty = None if target_difficulty in ("", "unspecified") else target_difficulty
+    novelty = None if novelty_preference in ("", "unspecified") else novelty_preference
+    return _action(
+        service, session_id,
+        lambda: service.update_session_brief(session_id, brief, difficulty, novelty),
+        "Brief updated. Re-triage a candidate to re-evaluate it against the new brief.",
+    )
 
 
 def candidate_board_view_empty():
@@ -95,6 +154,24 @@ def upload_candidate(service, session_id, level_text, title):
         service, session_id,
         lambda: service.add_uploaded_candidate(session_id, level_text, title or None),
         "Uploaded candidate added.",
+    )
+
+
+def upload_candidate_file(service, session_id, file_path, title):
+    """Add an uploaded candidate by reading a tile grid text file from disk."""
+    if not file_path:
+        board, ids, queue = _views_safe(service, session_id)
+        return board, ids, queue, "Choose a tile grid (.txt) file first."
+    try:
+        level_text = Path(file_path).read_text(encoding="utf-8")
+    except OSError as exc:
+        board, ids, queue = _views_safe(service, session_id)
+        return board, ids, queue, f"Could not read file: {exc}"
+    chosen_title = title or Path(file_path).stem
+    return _action(
+        service, session_id,
+        lambda: service.add_uploaded_candidate(session_id, level_text, chosen_title),
+        f"Uploaded candidate from {Path(file_path).name}.",
     )
 
 

@@ -30,6 +30,7 @@ _DIFFICULTY = ["unspecified", "easy", "medium", "hard"]
 _NOVELTY = ["unspecified", "style consistent", "balanced", "original"]
 _TERMINAL = {"complete", "archived", "structural_rejected"}
 _SENDABLE = {"ready_for_playtest", "derivative_review_needed"}
+_RETRIAGEABLE = {"clarification_needed", "revision_needed", "human_review_needed"}
 _CARDS_PER_ROW = 3
 
 # One service per engine, built lazily so the real adapters (which load models and
@@ -69,47 +70,123 @@ def _get_service(engine: str):
     return _services[engine]
 
 
+# Read only service for list, load, cancel, and brief edits. Kept separate from
+# the engine services because it builds no adapters and triggers no model load, so
+# constructing it (for example to populate the saved sessions list at startup) does
+# not count as eagerly building an engine.
+_viewer: list = []
+
+
+def _viewer_service():
+    """A read only service for list, load, cancel, and brief edits.
+
+    These operations never call a prior project, so they use a service with no
+    adapters and never trigger a model load, regardless of the selected engine.
+    Both engines and the viewer share the same output root, so the session files
+    they read and write are the same.
+    """
+    if not _viewer:
+        from ai_level_director.workflow.service import LevelDirectorService
+
+        _viewer.append(LevelDirectorService(_OUTPUT_ROOT))
+    return _viewer[0]
+
+
+def _list_sessions():
+    """List saved sessions as (label, id) pairs for the load control."""
+    return cb.list_saved_session_choices(_viewer_service())
+
+
+def _toast(status: str) -> None:
+    """Surface a status string as a transient toast notification."""
+    if status.startswith("Error"):
+        gr.Warning(status)
+    else:
+        gr.Info(status)
+
+
 # Action helpers. State changing actions return the new refresh tick and a status;
 # every dynamic tab re-renders when the tick changes.
 
 def _act(engine, session_id, tick, cid, op):
-    """Run a candidate action callback and bump the refresh tick."""
+    """Run a candidate action callback, toast the result, and bump the refresh tick."""
     *_, status = op(_get_service(engine), session_id, cid)
+    _toast(status)
     return tick + 1, status
 
 
-def w_start(engine, brief, difficulty, novelty, tick):
-    sid, _b, _i, _q, status = cb.start_session(_get_service(engine), brief, difficulty, novelty)
-    return sid, tick + 1, status
+def w_start(engine, brief, difficulty, novelty, name, tick):
+    sid, _b, _i, _q, status = cb.start_session(_get_service(engine), brief, difficulty, novelty, name)
+    _toast(status)
+    return sid, tick + 1, status, gr.update(choices=_list_sessions())
+
+
+def w_load(sid_choice, tick):
+    svc = _viewer_service()
+    loaded_id, _b, _i, _q, status = cb.load_existing_session(svc, sid_choice)
+    _toast(status)
+    if loaded_id:
+        s = svc.load_session(loaded_id)
+        return (loaded_id, tick + 1, status, s.design_brief,
+                s.target_difficulty or "unspecified", s.novelty_preference or "unspecified")
+    return None, tick + 1, status, "", "unspecified", "unspecified"
+
+
+def w_cancel(tick):
+    _sid, _b, _i, _q, status = cb.cancel_session()
+    _toast(status)
+    return None, tick + 1, status, "", "unspecified", "unspecified"
+
+
+def w_refresh_sessions():
+    return gr.update(choices=_list_sessions())
+
+
+def w_update_brief(sid, brief, difficulty, novelty, tick):
+    *_, status = cb.update_brief(_viewer_service(), sid, brief, difficulty, novelty)
+    _toast(status)
+    return tick + 1, status
 
 
 def w_generate(engine, sid, n, temperature, seed, tick):
     *_, status = cb.generate_candidates(_get_service(engine), sid, n, temperature, seed)
+    _toast(status)
     return tick + 1, status
 
 
 def w_upload(engine, sid, text, title, tick):
     *_, status = cb.upload_candidate(_get_service(engine), sid, text, title)
+    _toast(status)
+    return tick + 1, status
+
+
+def w_upload_file(engine, sid, file_path, title, tick):
+    *_, status = cb.upload_candidate_file(_get_service(engine), sid, file_path, title)
+    _toast(status)
     return tick + 1, status
 
 
 def w_sample(engine, sid, sample, tick):
     *_, status = cb.load_sample(_get_service(engine), sid, sample)
+    _toast(status)
     return tick + 1, status
 
 
 def w_feedback(engine, sid, cid, text, tick):
     *_, status = cb.submit_feedback(_get_service(engine), sid, cid, text)
+    _toast(status)
     return tick + 1, status
 
 
 def w_revise(engine, sid, parent, text, notes, tick):
     *_, status = cb.create_revised_candidate(_get_service(engine), sid, parent, text, notes)
+    _toast(status)
     return tick + 1, status
 
 
 def w_report(engine, sid):
     report_text, report_path, session_json, timeline, status = cb.build_report(_get_service(engine), sid)
+    _toast(status)
     return report_text, timeline, report_path, session_json, status
 
 
@@ -143,13 +220,29 @@ def build_app() -> gr.Blocks:
         refresh_tick = gr.State(0)
         selected_detail_id = gr.State(None)
 
+        with gr.Row():
+            saved_dd = gr.Dropdown(_list_sessions(), label="Saved sessions", scale=3)
+            load_btn = gr.Button("Load Session", variant="primary", scale=1)
+            refresh_list_btn = gr.Button("Refresh list", scale=1)
+            cancel_btn = gr.Button("Cancel / Start Over", variant="stop", scale=1)
+
+        refresh_list_btn.click(w_refresh_sessions, None, [saved_dd])
+
         with gr.Tab("Design Session"):
+            session_name = gr.Textbox(label="Session name (optional)",
+                                      placeholder="My easy opener")
             brief = gr.Textbox(label="Design brief", lines=3,
                                placeholder="An easy beginner friendly opening segment...")
             with gr.Row():
                 difficulty = gr.Dropdown(_DIFFICULTY, value="unspecified", label="Target difficulty")
                 novelty = gr.Dropdown(_NOVELTY, value="unspecified", label="Novelty preference")
-            start_btn = gr.Button("Start New Session", variant="primary")
+            with gr.Row():
+                start_btn = gr.Button("Start New Session", variant="primary")
+                update_brief_btn = gr.Button("Update Brief", variant="primary")
+            gr.Markdown(
+                "_Update Brief edits the current session's brief in place. Re-triage a "
+                "candidate afterward to re-evaluate it, for example after a clarification request._"
+            )
 
             gr.Markdown("### Add candidates")
             with gr.Row():
@@ -158,23 +251,33 @@ def build_app() -> gr.Blocks:
                     gen_n = gr.Slider(1, 5, value=1, step=1, label="Count")
                     gen_temp = gr.Slider(0.7, 1.5, value=1.2, step=0.1, label="Temperature")
                     gen_seed = gr.Number(label="Seed (optional)", value=None)
-                    gen_btn = gr.Button("Generate Candidates")
+                    gen_btn = gr.Button("Generate Candidates", variant="primary")
                 with gr.Column():
                     gr.Markdown("**Upload**")
                     up_text = gr.Textbox(label="Paste tile grid", lines=6)
                     up_title = gr.Textbox(label="Title (optional)")
-                    up_btn = gr.Button("Add Uploaded Candidate")
+                    up_btn = gr.Button("Add Uploaded Candidate", variant="primary")
+                    up_file = gr.File(label="...or upload a .txt grid", file_types=[".txt"], type="filepath")
+                    up_file_btn = gr.Button("Add From File", variant="primary")
                 with gr.Column():
                     gr.Markdown("**Sample**")
                     sample_dd = gr.Dropdown(cb.list_sample_levels(), label="Bundled sample")
-                    sample_btn = gr.Button("Load Sample Candidate")
+                    sample_btn = gr.Button("Load Sample Candidate", variant="primary")
 
-            start_btn.click(w_start, [engine, brief, difficulty, novelty, refresh_tick],
-                            [session_id, refresh_tick, status])
+            start_btn.click(w_start, [engine, brief, difficulty, novelty, session_name, refresh_tick],
+                            [session_id, refresh_tick, status, saved_dd])
+            update_brief_btn.click(w_update_brief, [session_id, brief, difficulty, novelty, refresh_tick],
+                                   [refresh_tick, status])
+            load_btn.click(w_load, [saved_dd, refresh_tick],
+                           [session_id, refresh_tick, status, brief, difficulty, novelty])
+            cancel_btn.click(w_cancel, [refresh_tick],
+                             [session_id, refresh_tick, status, brief, difficulty, novelty])
             gen_btn.click(w_generate, [engine, session_id, gen_n, gen_temp, gen_seed, refresh_tick],
                           [refresh_tick, status])
             up_btn.click(w_upload, [engine, session_id, up_text, up_title, refresh_tick],
                          [refresh_tick, status])
+            up_file_btn.click(w_upload_file, [engine, session_id, up_file, up_title, refresh_tick],
+                              [refresh_tick, status])
             sample_btn.click(w_sample, [engine, session_id, sample_dd, refresh_tick],
                              [refresh_tick, status])
 
@@ -199,27 +302,34 @@ def build_app() -> gr.Blocks:
                                     )
                                     gr.Code(render_level_ascii(c.level_text))
                                     gr.Markdown(_card_info(c))
+                                    state = c.workflow_state
                                     with gr.Row():
-                                        state = c.workflow_state
                                         if state == "draft":
-                                            b = gr.Button("Triage", size="sm")
+                                            b = gr.Button("Triage", size="sm", variant="primary")
+                                            b.click(
+                                                lambda e, s, t, cid=c.candidate_id: _act(e, s, t, cid, cb.run_triage),
+                                                [engine, session_id, refresh_tick], [refresh_tick, status],
+                                            )
+                                        if state in _RETRIAGEABLE:
+                                            b = gr.Button("Re-triage", size="sm", variant="primary")
                                             b.click(
                                                 lambda e, s, t, cid=c.candidate_id: _act(e, s, t, cid, cb.run_triage),
                                                 [engine, session_id, refresh_tick], [refresh_tick, status],
                                             )
                                         if state in _SENDABLE:
-                                            b = gr.Button("Send to Playtest", size="sm")
+                                            b = gr.Button("Send to Playtest", size="sm", variant="primary")
                                             b.click(
                                                 lambda e, s, t, cid=c.candidate_id: _act(e, s, t, cid, cb.send_to_playtest),
                                                 [engine, session_id, refresh_tick], [refresh_tick, status],
                                             )
-                                        if state not in _TERMINAL:
-                                            bc = gr.Button("Complete", size="sm")
+                                    if state not in _TERMINAL:
+                                        with gr.Row():
+                                            bc = gr.Button("Complete", size="sm", variant="primary")
                                             bc.click(
                                                 lambda e, s, t, cid=c.candidate_id: _act(e, s, t, cid, cb.mark_complete),
                                                 [engine, session_id, refresh_tick], [refresh_tick, status],
                                             )
-                                            ba = gr.Button("Archive", size="sm")
+                                            ba = gr.Button("Archive", size="sm", variant="stop")
                                             ba.click(
                                                 lambda e, s, t, cid=c.candidate_id: _act(e, s, t, cid, cb.archive_candidate),
                                                 [engine, session_id, refresh_tick], [refresh_tick, status],
@@ -271,7 +381,7 @@ def build_app() -> gr.Blocks:
                     gr.Markdown("### Create a revised candidate")
                     rtext = gr.Textbox(label="Revised tile grid", lines=6)
                     rnotes = gr.Textbox(label="Revision notes (optional)")
-                    rbtn = gr.Button("Create Revised Candidate")
+                    rbtn = gr.Button("Create Revised Candidate", variant="primary")
                     rbtn.click(
                         lambda e, s, text, notes, t, parent=cid: w_revise(e, s, parent, text, notes, t),
                         [engine, session_id, rtext, rnotes, refresh_tick], [refresh_tick, status],
