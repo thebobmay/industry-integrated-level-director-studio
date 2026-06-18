@@ -24,7 +24,7 @@ The system integrates three prior capstone projects, each wrapped behind an adap
 | Agentic AI (level design triage agent) | Triage authority | `Project6TriageAdapter` | The agent owns design judgment, not facts; it is reused unchanged and its reasoning is never duplicated. |
 | Machine Learning (player feedback classifier) | Post playtest signal | `Project3FeedbackAdapter` | The classifier is a broad reception signal, not a complete playtest analysis; it returns a label with no confidence. |
 
-The vendored prior project components live under `integrations/`. Each adapter returns Project 7 domain objects, so the mock and real adapters are interchangeable.
+The prior project code lives in a few places: the Agentic AI triage agent is vendored under `integrations/project6_triage/`, the Generative AI model architecture is under `src/ai_level_director/adapters/project5_model/`, and the trained Generative AI and Machine Learning model artifacts are under `models/`. Each adapter returns Project 7 domain objects, so the mock and real adapters are interchangeable.
 
 ## Files Included
 
@@ -35,13 +35,14 @@ src/ai_level_director/           Implementation package
   domain/                        Pydantic models, states, events
   workflow/                      Service facade, candidate state machine, sources
   adapters/                      Project 5, 6, 3 adapters, interfaces, mocks
+    project5_model/              Generative AI model architecture (vendored)
   storage/                       JSON session store, JSONL event log, paths
   rendering/                     ASCII level renderer
   reporting/                     Markdown session report builder
   ui/                            View models and framework free callbacks
-integrations/                    Vendored Project 5, 6, 3 components
+integrations/project6_triage/    Agentic AI triage agent (vendored)
 data/                            Sample levels and scenarios
-models/                          Prior project model artifacts
+models/                          Trained Generative AI and Machine Learning artifacts
 outputs/                         Sessions, logs, candidates, reports, triage transcripts
 docs/architecture/               Architecture diagrams (Mermaid + rendered PNG)
 docs/Reflective_Synthesis_Paper.pdf   The reflective synthesis paper

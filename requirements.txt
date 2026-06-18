@@ -1,3 +1,5 @@
+# PyTorch CPU build (torch==2.6.0+cpu below) resolves from the PyTorch CPU index.
+--extra-index-url https://download.pytorch.org/whl/cpu
 ag-ui-protocol==0.1.19
 aiofile==3.11.1
 aiohappyeyeballs==2.6.2
