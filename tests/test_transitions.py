@@ -80,6 +80,19 @@ def test_disallowed_transitions(current, target):
     assert not can_transition(current, target)
 
 
+@pytest.mark.parametrize("current", ["clarification_needed", "revision_needed", "human_review_needed"])
+def test_retriage_allowed_from_soft_states(current):
+    # A candidate in a soft pre playtest state can be re-triaged after the designer
+    # edits the brief, so every triage outcome is reachable from it.
+    for target in TRIAGE_ACTION_TO_STATE.values():
+        assert can_transition(current, target)
+
+
+def test_retriage_not_allowed_from_terminal_states():
+    for current in ("complete", "archived", "structural_rejected"):
+        assert not can_transition(current, "ready_for_playtest")
+
+
 def test_ensure_transition_guard():
     assert ensure_transition("draft", "ready_for_playtest") == "ready_for_playtest"
     with pytest.raises(InvalidTransitionError):

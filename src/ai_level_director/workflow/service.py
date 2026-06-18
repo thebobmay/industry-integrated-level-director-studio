@@ -13,6 +13,7 @@ adapters, so mock adapters and the real prior project adapters are interchangeab
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from uuid import uuid4
 
@@ -58,6 +59,12 @@ def _new_session_id() -> str:
     return f"session-{uuid4().hex[:8]}"
 
 
+def _slugify(text: str) -> str:
+    """Turn a session name into a filesystem and url safe id stem."""
+    slug = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+    return slug or "session"
+
+
 class LevelDirectorService:
     """Facade over the session store, candidate operations, and adapters.
 
@@ -88,11 +95,21 @@ class LevelDirectorService:
         target_difficulty: str | None = None,
         novelty_preference: str | None = None,
         session_id: str | None = None,
+        session_name: str | None = None,
     ) -> DesignSession:
-        """Create a new design session, persist it, and return it."""
+        """Create a new design session, persist it, and return it.
+
+        When a name is given and no explicit id, the id is a unique slug of the
+        name so files and the load list read clearly. The display name is stored
+        and falls back to the id when unnamed.
+        """
+        name = session_name.strip() if session_name and session_name.strip() else None
+        if session_id is None:
+            session_id = self._unique_session_id(_slugify(name)) if name else _new_session_id()
         now = utc_now_iso()
         session = DesignSession(
-            session_id=session_id or _new_session_id(),
+            session_id=session_id,
+            session_name=name or session_id,
             design_brief=design_brief,
             target_difficulty=target_difficulty,
             novelty_preference=novelty_preference,
@@ -100,6 +117,43 @@ class LevelDirectorService:
             updated_at=now,
         )
         self.store.save_session(session)
+        return session
+
+    def _unique_session_id(self, base: str) -> str:
+        """Return base, or base-2, base-3, ... so a named session never overwrites one."""
+        candidate = base
+        suffix = 2
+        while self.store.session_exists(candidate):
+            candidate = f"{base}-{suffix}"
+            suffix += 1
+        return candidate
+
+    def update_session_brief(
+        self,
+        session_id: str,
+        design_brief: str,
+        target_difficulty: str | None = None,
+        novelty_preference: str | None = None,
+    ) -> DesignSession:
+        """Update the session's brief and targets, persist, and log the change.
+
+        The brief is fixed when a session starts, so this is how a designer responds
+        to a clarification request: refine the intent, then re-triage a candidate
+        against it. Existing candidates and their history are untouched.
+        """
+        session = self.load_session(session_id)
+        session.design_brief = design_brief
+        session.target_difficulty = target_difficulty
+        session.novelty_preference = novelty_preference
+        session.updated_at = utc_now_iso()
+        event = CandidateEvent(
+            event_id=f"{session_id}-brief-{utc_now_iso()}",
+            timestamp=utc_now_iso(),
+            event_type="brief_updated",
+            candidate_id=None,
+            summary="Design brief updated.",
+        )
+        self._persist(session, event)
         return session
 
     def load_session(self, session_id: str) -> DesignSession:

@@ -43,6 +43,20 @@ class SessionStore:
         """Return whether a saved snapshot exists for the session id."""
         return paths.session_path(session_id, self.output_root).exists()
 
+    def list_sessions(self) -> list[str]:
+        """Return the ids of all saved sessions, newest modified first.
+
+        Reads the sessions directory rather than a database. Returns an empty list
+        if no sessions have been saved yet.
+        """
+        sessions_dir = paths.session_path("_", self.output_root).parent
+        if not sessions_dir.exists():
+            return []
+        files = sorted(
+            sessions_dir.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True
+        )
+        return [p.stem for p in files]
+
     def append_event(self, session_id: str, event: CandidateEvent) -> Path:
         """Append one event to the session's JSONL event log and return its path."""
         target = paths.event_log_path(session_id, self.output_root)

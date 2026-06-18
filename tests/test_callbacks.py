@@ -84,6 +84,64 @@ def test_triage_artifacts_empty_before_triage(tmp_path):
     assert arts["report_path"] is None
 
 
+def test_list_and_load_saved_session(tmp_path):
+    service = make_service(tmp_path)
+    sid, *_ = cb.start_session(service, "brief", "easy", "")
+    cb.upload_candidate(service, sid, LEVEL, "L")
+
+    assert sid in cb.list_saved_sessions(service)
+    loaded_id, board, ids, queue, status = cb.load_existing_session(service, sid)
+    assert loaded_id == sid
+    assert ids == ["U-001"]
+    assert "Loaded" in status
+
+
+def test_named_session_appears_in_load_choices(tmp_path):
+    service = make_service(tmp_path)
+    cb.start_session(service, "brief", "easy", "", "My Easy Opener")
+    choices = cb.list_saved_session_choices(service)
+    labels = [label for label, _id in choices]
+    ids = [sid for _label, sid in choices]
+    assert "my-easy-opener" in ids
+    assert any("My Easy Opener" in label for label in labels)
+
+
+def test_load_missing_session_reports_error(tmp_path):
+    service = make_service(tmp_path)
+    loaded_id, board, ids, queue, status = cb.load_existing_session(service, "nope")
+    assert loaded_id is None
+    assert "not found" in status.lower()
+
+
+def test_cancel_session_clears_state():
+    sid, board, ids, queue, status = cb.cancel_session()
+    assert sid is None
+    assert ids == []
+    assert "cleared" in status.lower()
+
+
+def test_update_brief_then_retriage(tmp_path):
+    service = make_service(tmp_path, action="request_clarification")
+    sid, *_ = cb.start_session(service, "vague", "", "")
+    cb.upload_candidate(service, sid, LEVEL, "L")
+    cb.run_triage(service, sid, "U-001")  # -> clarification_needed
+
+    board, ids, queue, status = cb.update_brief(service, sid, "A clearer brief", "easy", "balanced")
+    assert "updated" in status.lower()
+    assert service.load_session(sid).design_brief == "A clearer brief"
+
+
+def test_upload_candidate_file(tmp_path):
+    service = make_service(tmp_path)
+    sid, *_ = cb.start_session(service, "brief", "easy", "")
+    grid = tmp_path / "my_level.txt"
+    grid.write_text(LEVEL, encoding="utf-8")
+
+    board, ids, queue, status = cb.upload_candidate_file(service, sid, str(grid), None)
+    assert ids == ["U-001"]
+    assert "my_level" in status
+
+
 def test_detail_switches_between_candidates_after_playtest(tmp_path):
     # Regression for the Candidate Detail lock: after a playtest loop bumps state,
     # selecting either candidate must still return that candidate's own detail. The
