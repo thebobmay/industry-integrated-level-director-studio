@@ -1,0 +1,229 @@
+{
+  "session_id": "demo-generated",
+  "project_name": "AI Level Director Studio",
+  "session_name": "demo-generated",
+  "design_brief": "An easy, beginner friendly opening segment with a gentle first jump.",
+  "target_difficulty": "easy",
+  "novelty_preference": null,
+  "session_status": "active",
+  "candidates": [
+    {
+      "candidate_id": "G-001",
+      "title": "Generated candidate",
+      "source": "generated",
+      "level_text": "--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n---------SSS----SQQS------------\n--------------------------------\n--------------------------------\n--------------------------------\nQ-----S----------SS------E------\n-------------------------<>-----\n----------------------------<>--\n------------------[]--[]-[]-[]--\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "level_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\candidates\\demo-generated\\G-001.txt",
+      "rendered_preview_path": null,
+      "workflow_state": "structural_rejected",
+      "parent_candidate_id": null,
+      "iteration_number": 1,
+      "generation_metadata": {
+        "source_project": "Project 5",
+        "target_difficulty": "easy",
+        "temperature": 1.2,
+        "seed": 42
+      },
+      "triage_result": {
+        "action": "reject_structural",
+        "readiness": "not_ready",
+        "rationale": "The candidate level contains a structural error: a pipe top is present without a corresponding pipe body or ground support. This is a fatal integrity issue that prevents the level from being playtested.",
+        "warnings": [
+          "pipe top without a body or ground support"
+        ],
+        "revision_recommendations": [],
+        "playtest_questions": [],
+        "transcript_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\triage_transcripts\\demo-generated\\G-001-r1.md",
+        "report_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\triage_reports\\demo-generated\\G-001-r1.md",
+        "raw_payload": {
+          "brief_text": "An easy, beginner friendly opening segment with a gentle first jump.\n\nTarget difficulty: easy.",
+          "candidate_level": "--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n---------SSS----SQQS------------\n--------------------------------\n--------------------------------\n--------------------------------\nQ-----S----------SS------E------\n-------------------------<>-----\n----------------------------<>--\n------------------[]--[]-[]-[]--\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+          "intent": {
+            "target_audience": "beginner",
+            "desired_feel": [
+              "gentle",
+              "welcoming"
+            ],
+            "difficulty_target": "easy",
+            "novelty_preference": "medium",
+            "hard_constraints": [],
+            "soft_preferences": [],
+            "detected_conflicts": []
+          },
+          "facts": {
+            "validation": {
+              "is_valid": false,
+              "warnings": [],
+              "fatal_errors": [
+                "pipe top without a body or ground support"
+              ]
+            },
+            "difficulty": {
+              "difficulty_label": "easy",
+              "difficulty_score": 0.223,
+              "enemy_density": 0.0022,
+              "hazard_density": 0.0,
+              "longest_gap": 0,
+              "solid_ratio": 0.0893,
+              "collectible_density": 0.0
+            },
+            "novelty": {
+              "nearest_neighbor_similarity": 0.381,
+              "novelty_label": "high",
+              "warning": null
+            },
+            "pacing": {
+              "flag": "back_loaded",
+              "opening_intensity": 0,
+              "middle_intensity": 0,
+              "final_intensity": 1,
+              "detail": "intensity opening 0, middle 0, final 1"
+            },
+            "safe_zone": {
+              "has_opening_safe_zone": true,
+              "first_challenge_column": 25,
+              "detail": "first challenge at column 25"
+            },
+            "spike": {
+              "has_spike": false,
+              "location_column": null,
+              "detail": "no local difficulty spike found"
+            }
+          },
+          "recommendation": {
+            "action": "reject_structural",
+            "diagnosis": "The candidate level contains a structural error: a pipe top is present without a corresponding pipe body or ground support. This is a fatal integrity issue that prevents the level from being playtested.",
+            "tradeoff_reasoning": [
+              "Structural integrity is a hard requirement for playtest readiness. The presence of a pipe top without a body or ground support is a critical defect that cannot be ignored, regardless of the level's other qualities or alignment with the design intent."
+            ],
+            "prescription": null,
+            "playtest_readiness": "not_ready",
+            "playtest_questions": [],
+            "confidence": "high"
+          },
+          "critique": {
+            "verdict": "approve",
+            "remaining_issues": [],
+            "constraint_violations": [],
+            "assessment": "The Director correctly identified a fatal structural integrity issue: a pipe top without a body or ground support. This is a hard constraint violation that must be addressed before playtesting, regardless of the level's otherwise appropriate difficulty, pacing, or novelty. The recommendation to reject for structural reasons is sound and consistent with the facts and the design intent.",
+            "confidence": "high"
+          },
+          "round_count": 1,
+          "critic_feedback_history": [],
+          "decision": "reject_structural",
+          "tool_call_log": [
+            {
+              "tool_name": "validate_candidate_level",
+              "inputs": {
+                "level": "candidate"
+              },
+              "outputs": {
+                "is_valid": false,
+                "warnings": [],
+                "fatal_errors": [
+                  "pipe top without a body or ground support"
+                ]
+              }
+            },
+            {
+              "tool_name": "estimate_candidate_difficulty",
+              "inputs": {
+                "level": "candidate"
+              },
+              "outputs": {
+                "difficulty_label": "easy",
+                "difficulty_score": 0.223,
+                "enemy_density": 0.0022,
+                "hazard_density": 0.0,
+                "longest_gap": 0,
+                "solid_ratio": 0.0893,
+                "collectible_density": 0.0
+              }
+            },
+            {
+              "tool_name": "measure_candidate_novelty",
+              "inputs": {
+                "level": "candidate"
+              },
+              "outputs": {
+                "nearest_neighbor_similarity": 0.381,
+                "novelty_label": "high",
+                "warning": null
+              }
+            },
+            {
+              "tool_name": "analyze_candidate_pacing",
+              "inputs": {
+                "level": "candidate"
+              },
+              "outputs": {
+                "flag": "back_loaded",
+                "opening_intensity": 0,
+                "middle_intensity": 0,
+                "final_intensity": 1,
+                "detail": "intensity opening 0, middle 0, final 1"
+              }
+            },
+            {
+              "tool_name": "detect_candidate_safe_zone",
+              "inputs": {
+                "level": "candidate"
+              },
+              "outputs": {
+                "has_opening_safe_zone": true,
+                "first_challenge_column": 25,
+                "detail": "first challenge at column 25"
+              }
+            },
+            {
+              "tool_name": "detect_candidate_spike",
+              "inputs": {
+                "level": "candidate"
+              },
+              "outputs": {
+                "has_spike": false,
+                "location_column": null,
+                "detail": "no local difficulty spike found"
+              }
+            }
+          ],
+          "token_usage": {
+            "input_tokens": 5209,
+            "output_tokens": 339,
+            "total_tokens": 5548,
+            "requests": 4
+          }
+        }
+      },
+      "feedback_records": [],
+      "created_at": "2026-06-18T15:06:20.806016+00:00",
+      "updated_at": "2026-06-18T15:06:35.677025+00:00",
+      "history": [
+        {
+          "event_id": "G-001-evt-1",
+          "timestamp": "2026-06-18T15:06:20.806016+00:00",
+          "event_type": "generated",
+          "candidate_id": "G-001",
+          "summary": "Candidate G-001 created from generated source.",
+          "payload": {}
+        },
+        {
+          "event_id": "G-001-evt-2",
+          "timestamp": "2026-06-18T15:06:35.677025+00:00",
+          "event_type": "triaged",
+          "candidate_id": "G-001",
+          "summary": "Triaged: reject_structural -> structural_rejected.",
+          "payload": {
+            "action": "reject_structural",
+            "readiness": "not_ready",
+            "transcript_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\triage_transcripts\\demo-generated\\G-001-r1.md",
+            "report_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\triage_reports\\demo-generated\\G-001-r1.md"
+          }
+        }
+      ]
+    }
+  ],
+  "selected_candidate_id": null,
+  "created_at": "2026-06-18T15:06:15.143096+00:00",
+  "updated_at": "2026-06-18T15:06:35.677025+00:00",
+  "session_notes": []
+}

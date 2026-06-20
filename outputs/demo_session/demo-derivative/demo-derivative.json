@@ -1,0 +1,260 @@
+{
+  "session_id": "demo-derivative",
+  "project_name": "AI Level Director Studio",
+  "session_name": "demo-derivative",
+  "design_brief": "An original easy opening segment. Avoid reusing existing layouts.",
+  "target_difficulty": "easy",
+  "novelty_preference": "original",
+  "session_status": "active",
+  "candidates": [
+    {
+      "candidate_id": "U-001",
+      "title": "Near duplicate of a known level",
+      "source": "uploaded",
+      "level_text": "--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n------oo------------------------\n--------------------------------\n----------------------<>--------\n----------------E-----[]--------\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n",
+      "level_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\candidates\\demo-derivative\\U-001.txt",
+      "rendered_preview_path": null,
+      "workflow_state": "revision_needed",
+      "parent_candidate_id": null,
+      "iteration_number": 1,
+      "generation_metadata": {},
+      "triage_result": {
+        "action": "recommend_revision",
+        "readiness": "revise_before_playtest",
+        "rationale": "The candidate is structurally valid but is highly derivative, with a novelty similarity of 1.0 to a known level. This directly violates the hard constraint to avoid reusing existing layouts and the explicit intent for originality and high novelty.",
+        "warnings": [],
+        "revision_recommendations": [
+          "Redesign the level layout to ensure it is original and does not reuse any existing known layouts. Consider introducing new platform arrangements, enemy placements, or interactive elements that have not appeared together in the reference library."
+        ],
+        "playtest_questions": [
+          "Does the revised layout feel fresh and distinct from any previously seen levels, while remaining welcoming and easy for beginners?"
+        ],
+        "transcript_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\triage_transcripts\\demo-derivative\\U-001-r1.md",
+        "report_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\triage_reports\\demo-derivative\\U-001-r1.md",
+        "raw_payload": {
+          "brief_text": "An original easy opening segment. Avoid reusing existing layouts.\n\nTarget difficulty: easy. Novelty preference: original.",
+          "candidate_level": "--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n------oo------------------------\n--------------------------------\n----------------------<>--------\n----------------E-----[]--------\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n",
+          "intent": {
+            "target_audience": "beginner",
+            "desired_feel": [
+              "original",
+              "welcoming"
+            ],
+            "difficulty_target": "easy",
+            "novelty_preference": "high",
+            "hard_constraints": [
+              "avoid reusing existing layouts"
+            ],
+            "soft_preferences": [
+              "originality"
+            ],
+            "detected_conflicts": []
+          },
+          "facts": {
+            "validation": {
+              "is_valid": true,
+              "warnings": [],
+              "fatal_errors": []
+            },
+            "difficulty": {
+              "difficulty_label": "easy",
+              "difficulty_score": 0.223,
+              "enemy_density": 0.0022,
+              "hazard_density": 0.0,
+              "longest_gap": 0,
+              "solid_ratio": 0.1429,
+              "collectible_density": 0.0045
+            },
+            "novelty": {
+              "nearest_neighbor_similarity": 1.0,
+              "novelty_label": "low",
+              "warning": "high similarity (1.000) to a known level; the candidate may be derivative"
+            },
+            "pacing": {
+              "flag": "balanced",
+              "opening_intensity": 0,
+              "middle_intensity": 1,
+              "final_intensity": 0,
+              "detail": "intensity opening 0, middle 1, final 0"
+            },
+            "safe_zone": {
+              "has_opening_safe_zone": true,
+              "first_challenge_column": 16,
+              "detail": "first challenge at column 16"
+            },
+            "spike": {
+              "has_spike": false,
+              "location_column": null,
+              "detail": "no local difficulty spike found"
+            }
+          },
+          "recommendation": {
+            "action": "recommend_revision",
+            "diagnosis": "The candidate is structurally valid but is highly derivative, with a novelty similarity of 1.0 to a known level. This directly violates the hard constraint to avoid reusing existing layouts and the explicit intent for originality and high novelty.",
+            "tradeoff_reasoning": [
+              "The candidate is structurally sound and could be playtested, but the hard constraint and intent require originality and avoidance of reused layouts.",
+              "High similarity (1.0) to a known level means the candidate is not original, which is unacceptable for this brief."
+            ],
+            "prescription": {
+              "suggested_edits": [
+                {
+                  "description": "Redesign the level layout to ensure it is original and does not reuse any existing known layouts. Consider introducing new platform arrangements, enemy placements, or interactive elements that have not appeared together in the reference library.",
+                  "reason": "This directly addresses the hard constraint and intent for high novelty and originality."
+                }
+              ],
+              "playtest_question": "Does the revised layout feel fresh and distinct from any previously seen levels, while remaining welcoming and easy for beginners?"
+            },
+            "playtest_readiness": "revise_before_playtest",
+            "playtest_questions": [],
+            "confidence": "high"
+          },
+          "critique": {
+            "verdict": "approve",
+            "remaining_issues": [],
+            "constraint_violations": [],
+            "assessment": "The Director's recommendation is sound. The candidate level is structurally valid and meets the easy difficulty and safe zone requirements for beginners, but it is highly derivative, with a novelty similarity of 1.0 to a known level. This directly conflicts with the hard constraint to avoid reusing existing layouts and the explicit intent for high novelty and originality. The prescribed revision is appropriate and necessary before playtest. No further issues are present beyond those already identified.",
+            "confidence": "high"
+          },
+          "round_count": 2,
+          "critic_feedback_history": [
+            "The candidate is highly derivative (novelty similarity 1.0), directly violating the hard constraint to avoid reusing existing layouts and the explicit intent for originality.",
+            "avoid reusing existing layouts"
+          ],
+          "decision": "recommend_revision",
+          "tool_call_log": [
+            {
+              "tool_name": "validate_candidate_level",
+              "inputs": {
+                "level": "candidate"
+              },
+              "outputs": {
+                "is_valid": true,
+                "warnings": [],
+                "fatal_errors": []
+              }
+            },
+            {
+              "tool_name": "estimate_candidate_difficulty",
+              "inputs": {
+                "level": "candidate"
+              },
+              "outputs": {
+                "difficulty_label": "easy",
+                "difficulty_score": 0.223,
+                "enemy_density": 0.0022,
+                "hazard_density": 0.0,
+                "longest_gap": 0,
+                "solid_ratio": 0.1429,
+                "collectible_density": 0.0045
+              }
+            },
+            {
+              "tool_name": "measure_candidate_novelty",
+              "inputs": {
+                "level": "candidate"
+              },
+              "outputs": {
+                "nearest_neighbor_similarity": 1.0,
+                "novelty_label": "low",
+                "warning": "high similarity (1.000) to a known level; the candidate may be derivative"
+              }
+            },
+            {
+              "tool_name": "analyze_candidate_pacing",
+              "inputs": {
+                "level": "candidate"
+              },
+              "outputs": {
+                "flag": "balanced",
+                "opening_intensity": 0,
+                "middle_intensity": 1,
+                "final_intensity": 0,
+                "detail": "intensity opening 0, middle 1, final 0"
+              }
+            },
+            {
+              "tool_name": "detect_candidate_safe_zone",
+              "inputs": {
+                "level": "candidate"
+              },
+              "outputs": {
+                "has_opening_safe_zone": true,
+                "first_challenge_column": 16,
+                "detail": "first challenge at column 16"
+              }
+            },
+            {
+              "tool_name": "detect_candidate_spike",
+              "inputs": {
+                "level": "candidate"
+              },
+              "outputs": {
+                "has_spike": false,
+                "location_column": null,
+                "detail": "no local difficulty spike found"
+              }
+            },
+            {
+              "tool_name": "validate_candidate_level",
+              "inputs": {
+                "level": "candidate"
+              },
+              "outputs": {
+                "is_valid": true,
+                "warnings": [],
+                "fatal_errors": []
+              }
+            },
+            {
+              "tool_name": "measure_candidate_novelty",
+              "inputs": {
+                "level": "candidate"
+              },
+              "outputs": {
+                "nearest_neighbor_similarity": 1.0,
+                "novelty_label": "low",
+                "warning": "high similarity (1.000) to a known level; the candidate may be derivative"
+              }
+            }
+          ],
+          "token_usage": {
+            "input_tokens": 10053,
+            "output_tokens": 877,
+            "total_tokens": 10930,
+            "requests": 7
+          }
+        }
+      },
+      "feedback_records": [],
+      "created_at": "2026-06-18T15:06:35.715428+00:00",
+      "updated_at": "2026-06-18T15:06:52.036778+00:00",
+      "history": [
+        {
+          "event_id": "U-001-evt-1",
+          "timestamp": "2026-06-18T15:06:35.715428+00:00",
+          "event_type": "uploaded",
+          "candidate_id": "U-001",
+          "summary": "Candidate U-001 created from uploaded source.",
+          "payload": {}
+        },
+        {
+          "event_id": "U-001-evt-2",
+          "timestamp": "2026-06-18T15:06:52.036778+00:00",
+          "event_type": "triaged",
+          "candidate_id": "U-001",
+          "summary": "Triaged: recommend_revision -> revision_needed.",
+          "payload": {
+            "action": "recommend_revision",
+            "readiness": "revise_before_playtest",
+            "transcript_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\triage_transcripts\\demo-derivative\\U-001-r1.md",
+            "report_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\triage_reports\\demo-derivative\\U-001-r1.md"
+          }
+        }
+      ]
+    }
+  ],
+  "selected_candidate_id": null,
+  "created_at": "2026-06-18T15:06:35.706144+00:00",
+  "updated_at": "2026-06-18T15:06:52.036778+00:00",
+  "session_notes": []
+}
