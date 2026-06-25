@@ -53,6 +53,12 @@ from ai_level_director.workflow.transitions import (
 # steps. These are the terminal states they cannot act on.
 _TERMINAL_STATES = {"complete", "archived", "structural_rejected"}
 
+# Project 3's analysis found the classifier is markedly less reliable on short reviews:
+# it misreads roughly 30% of short negative reviews as positive. Following that paper's
+# own recommendation, feedback below this length is flagged so the designer scrutinizes
+# the text rather than trusting the label. Short is 3 to 24 words; long is 25 or more.
+SHORT_REVIEW_WORD_COUNT = 25
+
 
 def _new_session_id() -> str:
     """Generate a short, unique session id."""
@@ -299,6 +305,14 @@ class LevelDirectorService:
         else:
             feedback_result = self.feedback_adapter.classify(feedback_text)
             new_state = state_for_feedback(feedback_result.sentiment)
+            word_count = len(feedback_text.split())
+            warning = None
+            if word_count < SHORT_REVIEW_WORD_COUNT:
+                warning = (
+                    f"Short feedback ({word_count} words). The classifier is less reliable "
+                    f"on short reviews and can misread short negative feedback as positive, "
+                    f"so review the text before trusting this label."
+                )
             record = PlaytestRecord(
                 playtest_id=f"{candidate_id}-pt-{len(candidate.feedback_records) + 1}",
                 candidate_id=candidate_id,
@@ -306,10 +320,14 @@ class LevelDirectorService:
                 feedback_text=feedback_text,
                 feedback_result=feedback_result,
                 status_after_feedback=new_state,
+                warning=warning,
             )
             candidate.feedback_records.append(record)
             summary = f"Feedback classified {feedback_result.sentiment} -> {new_state}."
             payload = {"classified": True, "sentiment": feedback_result.sentiment}
+            if warning:
+                summary += " Short review, flagged for designer review."
+                payload["short_review"] = True
 
         ensure_transition("feedback_received", new_state)
         event = self._record_state_change(
@@ -343,6 +361,46 @@ class LevelDirectorService:
         event = self._record_state_change(
             session, candidate, "archived", event_type="archived",
             summary=f"Candidate {candidate_id} archived.",
+        )
+        self._persist(session, event)
+        return session
+
+    def override_feedback(
+        self, session_id: str, candidate_id: str, corrected_sentiment: str
+    ) -> DesignSession:
+        """Let the designer override the classifier's feedback sentiment.
+
+        The classifier is advisory, so after reading the playtester text the designer
+        can correct its call. The classifier's original label is preserved on the
+        record for the audit trail; the correction is recorded as its own event and
+        moves the candidate to the state matching the corrected sentiment. This is a
+        designer override and bypasses the automated transition guard, like
+        mark_complete and archive.
+        """
+        if corrected_sentiment not in ("positive", "negative"):
+            raise ValueError(f"Invalid sentiment: '{corrected_sentiment}'.")
+        session = self.load_session(session_id)
+        candidate = self._get_candidate(session, candidate_id)
+        if not candidate.feedback_records:
+            raise InvalidTransitionError(
+                "Cannot override feedback before any feedback has been classified."
+            )
+        record = candidate.feedback_records[-1]
+        record.designer_override = corrected_sentiment
+        new_state = state_for_feedback(corrected_sentiment)
+        event = self._record_state_change(
+            session,
+            candidate,
+            new_state,
+            event_type="feedback_overridden",
+            summary=(
+                f"Designer overrode feedback from {record.feedback_result.sentiment} "
+                f"to {corrected_sentiment} -> {new_state}."
+            ),
+            payload={
+                "classifier_sentiment": record.feedback_result.sentiment,
+                "designer_sentiment": corrected_sentiment,
+            },
         )
         self._persist(session, event)
         return session

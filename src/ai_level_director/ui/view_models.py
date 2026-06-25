@@ -147,10 +147,16 @@ def candidate_detail_view(session: DesignSession, candidate_id: str | None) -> d
         triage_markdown = "_Not triaged yet._"
 
     if candidate.feedback_records:
-        feedback_markdown = "\n".join(
-            f"- [{r.feedback_result.sentiment}] {r.feedback_text}"
-            for r in candidate.feedback_records
-        )
+        feedback_lines = []
+        for r in candidate.feedback_records:
+            feedback_lines.append(f"- [{r.feedback_result.sentiment}] {r.feedback_text}")
+            if r.warning:
+                feedback_lines.append(f"  - *{r.warning}*")
+            if r.designer_override and r.designer_override != r.feedback_result.sentiment:
+                feedback_lines.append(
+                    f"  - *Designer corrected this to {r.designer_override}.*"
+                )
+        feedback_markdown = "\n".join(feedback_lines)
     else:
         feedback_markdown = "_No feedback yet._"
 

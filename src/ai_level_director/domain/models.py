@@ -62,7 +62,13 @@ class FeedbackResult(BaseModel):
 
 
 class PlaytestRecord(BaseModel):
-    """A single playtest submission and the feedback classification it produced."""
+    """A single playtest submission and the feedback classification it produced.
+
+    ``warning`` carries an integration level reliability note (for example that the
+    feedback was too short for the classifier to be trusted). It is advisory text for
+    the designer, not a classifier output, so it lives here rather than on
+    ``FeedbackResult``.
+    """
 
     playtest_id: str
     candidate_id: str
@@ -70,6 +76,11 @@ class PlaytestRecord(BaseModel):
     feedback_text: str
     feedback_result: FeedbackResult
     status_after_feedback: CandidateState
+    warning: str | None = None
+    # The designer's corrected sentiment, when they override the classifier after
+    # reading the text. The classifier's own label stays in feedback_result for the
+    # audit trail; this records that a human disagreed.
+    designer_override: FeedbackSentiment | None = None
 
 
 class LevelCandidate(BaseModel):

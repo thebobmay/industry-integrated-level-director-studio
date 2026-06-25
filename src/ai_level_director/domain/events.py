@@ -25,6 +25,7 @@ CandidateEventType = Literal[
     "archived",
     "report_generated",
     "brief_updated",
+    "feedback_overridden",
 ]
 
 

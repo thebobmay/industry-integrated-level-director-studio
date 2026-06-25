@@ -233,6 +233,15 @@ def submit_feedback(service, session_id, candidate_id, feedback_text):
     )
 
 
+def override_feedback(service, session_id, candidate_id, corrected_sentiment):
+    """Designer override of the classifier's feedback sentiment after reading the text."""
+    return _action(
+        service, session_id,
+        lambda: service.override_feedback(session_id, candidate_id, corrected_sentiment),
+        f"Feedback for {candidate_id} set to {corrected_sentiment} by designer.",
+    )
+
+
 def mark_complete(service, session_id, candidate_id):
     """Mark a candidate complete."""
     return _action(

@@ -199,6 +199,68 @@ def test_update_brief_and_retriage(tmp_path):
     assert "brief_updated" in events
 
 
+def test_short_feedback_attaches_reliability_warning(tmp_path):
+    # Short feedback still routes by label, but carries a reliability warning so the
+    # designer scrutinizes the text (Project 3 misreads short reviews more often).
+    service = make_service(tmp_path, action="accept_for_playtest")
+    seeded_session(service)
+    service.run_triage("S1", "U-001")
+    service.send_to_playtest("S1", "U-001")
+    session = service.submit_feedback("S1", "U-001", "Fun and fair!")
+
+    candidate = session.candidates[0]
+    assert candidate.workflow_state == "complete"  # routing unchanged
+    record = candidate.feedback_records[0]
+    assert record.warning is not None and "short" in record.warning.lower()
+    fb_event = [e for e in service.store.read_events("S1") if e.event_type == "feedback_submitted"][0]
+    assert fb_event.payload.get("short_review") is True
+
+
+def test_long_feedback_has_no_warning(tmp_path):
+    service = make_service(tmp_path, action="accept_for_playtest")
+    seeded_session(service)
+    service.run_triage("S1", "U-001")
+    service.send_to_playtest("S1", "U-001")
+    long_text = (
+        "This opening segment plays really well and the pacing feels just right for a "
+        "beginner, with a gentle introduction to jumping and timing, and everything here "
+        "felt smooth and enjoyable to me throughout."
+    )
+    session = service.submit_feedback("S1", "U-001", long_text)
+
+    record = session.candidates[0].feedback_records[0]
+    assert record.warning is None
+
+
+def test_designer_overrides_feedback_to_negative(tmp_path):
+    # Classifier says positive (candidate completes); designer reads the text, disagrees,
+    # and overrides to negative, moving the candidate to revision_needed. The classifier's
+    # original label is preserved for the audit trail.
+    service = make_service(tmp_path, action="accept_for_playtest")
+    seeded_session(service)
+    service.run_triage("S1", "U-001")
+    service.send_to_playtest("S1", "U-001")
+    service.submit_feedback("S1", "U-001", "Fun and fair!")  # short positive -> complete
+    assert service.load_session("S1").candidates[0].workflow_state == "complete"
+
+    session = service.override_feedback("S1", "U-001", "negative")
+    candidate = session.candidates[0]
+    assert candidate.workflow_state == "revision_needed"
+    record = candidate.feedback_records[-1]
+    assert record.feedback_result.sentiment == "positive"  # classifier label preserved
+    assert record.designer_override == "negative"
+    ov = [e for e in service.store.read_events("S1") if e.event_type == "feedback_overridden"][0]
+    assert ov.payload["classifier_sentiment"] == "positive"
+    assert ov.payload["designer_sentiment"] == "negative"
+
+
+def test_override_before_feedback_raises(tmp_path):
+    service = make_service(tmp_path)
+    seeded_session(service)
+    with pytest.raises(InvalidTransitionError):
+        service.override_feedback("S1", "U-001", "negative")
+
+
 def test_full_happy_path_event_log(tmp_path):
     service = make_service(tmp_path, action="accept_for_playtest")
     seeded_session(service)

@@ -115,6 +115,13 @@ def _act(engine, session_id, tick, cid, op):
     return tick + 1, status
 
 
+def _override(engine, session_id, tick, cid, sentiment):
+    """Run the designer feedback override callback and bump the refresh tick."""
+    *_, status = cb.override_feedback(_get_service(engine), session_id, cid, sentiment)
+    _toast(status)
+    return tick + 1, status
+
+
 def w_start(engine, brief, difficulty, novelty, name, tick):
     sid, _b, _i, _q, status = cb.start_session(_get_service(engine), brief, difficulty, novelty, name)
     _toast(status)
@@ -199,7 +206,11 @@ def _card_info(candidate) -> str:
         if triage.warnings:
             lines.append(f"Warning: {triage.warnings[0]}")
     if candidate.feedback_records:
-        lines.append(f"Feedback: {candidate.feedback_records[-1].feedback_result.sentiment}")
+        last = candidate.feedback_records[-1]
+        line = f"Feedback: {last.feedback_result.sentiment}"
+        if last.warning:
+            line += " (short review, check text)"
+        lines.append(line)
     return "\n\n".join(lines) if lines else "_Not triaged yet._"
 
 
@@ -356,14 +367,30 @@ def build_app() -> gr.Blocks:
                     gr.Markdown("_No session yet._")
                     return
                 session = _get_service(eng).load_session(sid)
+                candidate = find_candidate(session, cid) if cid else None
                 detail = candidate_detail_view(session, cid)
                 gr.Markdown(detail["metadata_markdown"])
                 gr.Code(detail["raw_level_text"], label="Level tiles")
                 gr.Markdown(detail["triage_markdown"])
                 gr.Markdown("**Feedback**\n\n" + detail["feedback_markdown"])
+                if candidate and candidate.feedback_records:
+                    gr.Markdown(
+                        "_The classifier is advisory. After reading the feedback, set the "
+                        "correct sentiment:_"
+                    )
+                    with gr.Row():
+                        fb_pos = gr.Button("Feedback is positive", size="sm", variant="primary")
+                        fb_neg = gr.Button("Feedback is negative", size="sm", variant="primary")
+                    fb_pos.click(
+                        lambda e, s, t, cid=cid: _override(e, s, t, cid, "positive"),
+                        [engine, session_id, refresh_tick], [refresh_tick, status],
+                    )
+                    fb_neg.click(
+                        lambda e, s, t, cid=cid: _override(e, s, t, cid, "negative"),
+                        [engine, session_id, refresh_tick], [refresh_tick, status],
+                    )
                 gr.Markdown("**History**\n\n" + detail["history_markdown"])
 
-                candidate = find_candidate(session, cid) if cid else None
                 if candidate:
                     arts = cb.triage_artifacts(_get_service(eng), sid, cid)
                     if arts["report_path"] or arts["transcript_path"]:
