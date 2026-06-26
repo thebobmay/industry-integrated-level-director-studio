@@ -1,8 +1,8 @@
 {
-  "session_id": "demo-negative",
+  "session_id": "demo-override",
   "project_name": "AI Level Director Studio",
-  "session_name": "demo-negative",
-  "design_brief": "A fair beginner segment. The first jump must not feel unfair.",
+  "session_name": "demo-override",
+  "design_brief": "A fair, beginner friendly opening segment.",
   "target_difficulty": "easy",
   "novelty_preference": null,
   "session_status": "active",
@@ -12,7 +12,7 @@
       "title": "Easy opener",
       "source": "uploaded",
       "level_text": "--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n------ooo-----------------------\n--------------------<>----------\n--------------------[]----------\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n",
-      "level_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\candidates\\demo-negative\\U-001.txt",
+      "level_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\candidates\\demo-override\\U-001.txt",
       "rendered_preview_path": null,
       "workflow_state": "revision_needed",
       "parent_candidate_id": null,
@@ -21,31 +21,28 @@
       "triage_result": {
         "action": "accept_for_playtest",
         "readiness": "ready_for_playtest",
-        "rationale": "The candidate is structurally valid, matches the easy difficulty target, and provides a safe, fair opening for beginners. There are no hazards or enemies, ensuring the first jump is not unfair. The novelty is medium, which is appropriate for the brief. Pacing is flat, which is suitable for a beginner segment. No difficulty spikes or structural issues are present.",
+        "rationale": "The candidate is structurally valid, matches the easy difficulty target, and provides a welcoming, fair experience for beginners. It opens with a long safe stretch and contains no hazards or enemies, aligning with the intent for a fair and welcoming beginner segment. Novelty is medium, which is appropriate for the brief.",
         "warnings": [],
         "revision_recommendations": [],
         "playtest_questions": [
-          "Does the segment feel welcoming and fair to a true beginner?",
-          "Is the absence of challenge engaging enough for the intended audience, or does it risk being too empty?"
+          "Does the lack of challenge make the segment feel too empty or boring for beginners, or does it successfully provide a welcoming introduction?",
+          "Do the coins and power-up placement encourage exploration or feel rewarding to new players?"
         ],
-        "transcript_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\triage_transcripts\\demo-negative\\U-001-r1.md",
-        "report_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\triage_reports\\demo-negative\\U-001-r1.md",
+        "transcript_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\triage_transcripts\\demo-override\\U-001-r1.md",
+        "report_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\triage_reports\\demo-override\\U-001-r1.md",
         "raw_payload": {
-          "brief_text": "A fair beginner segment. The first jump must not feel unfair.\n\nTarget difficulty: easy.",
+          "brief_text": "A fair, beginner friendly opening segment.\n\nTarget difficulty: easy.",
           "candidate_level": "--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n------ooo-----------------------\n--------------------<>----------\n--------------------[]----------\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n",
           "intent": {
             "target_audience": "beginner",
             "desired_feel": [
-              "fair"
+              "fair",
+              "welcoming"
             ],
             "difficulty_target": "easy",
             "novelty_preference": "medium",
-            "hard_constraints": [
-              "the first jump must not feel unfair"
-            ],
-            "soft_preferences": [
-              "fairness"
-            ],
+            "hard_constraints": [],
+            "soft_preferences": [],
             "detected_conflicts": []
           },
           "facts": {
@@ -88,17 +85,17 @@
           },
           "recommendation": {
             "action": "accept_for_playtest",
-            "diagnosis": "The candidate is structurally valid, matches the easy difficulty target, and provides a safe, fair opening for beginners. There are no hazards or enemies, ensuring the first jump is not unfair. The novelty is medium, which is appropriate for the brief. Pacing is flat, which is suitable for a beginner segment. No difficulty spikes or structural issues are present.",
+            "diagnosis": "The candidate is structurally valid, matches the easy difficulty target, and provides a welcoming, fair experience for beginners. It opens with a long safe stretch and contains no hazards or enemies, aligning with the intent for a fair and welcoming beginner segment. Novelty is medium, which is appropriate for the brief.",
             "tradeoff_reasoning": [
-              "The absence of hazards and a flat pacing profile are appropriate for a beginner, easy segment, prioritizing fairness and accessibility.",
-              "Medium novelty is sufficient given the brief's preference, and the segment is not overly derivative.",
-              "The level opens with a safe zone and contains no unfair jumps, directly supporting the hard constraint."
+              "The absence of hazards or enemies ensures fairness and accessibility for beginners, which is the primary intent.",
+              "The flat pacing and lack of challenge are appropriate for an easy, welcoming segment, especially as an opener or tutorial.",
+              "Medium novelty is sufficient given the brief's preference, and the structure is valid."
             ],
             "prescription": null,
             "playtest_readiness": "ready_for_playtest",
             "playtest_questions": [
-              "Does the segment feel welcoming and fair to a true beginner?",
-              "Is the absence of challenge engaging enough for the intended audience, or does it risk being too empty?"
+              "Does the lack of challenge make the segment feel too empty or boring for beginners, or does it successfully provide a welcoming introduction?",
+              "Do the coins and power-up placement encourage exploration or feel rewarding to new players?"
             ],
             "confidence": "high"
           },
@@ -106,7 +103,7 @@
             "verdict": "approve",
             "remaining_issues": [],
             "constraint_violations": [],
-            "assessment": "The Director's recommendation is sound. The candidate level is structurally valid, matches the easy difficulty target, and provides a safe, fair opening for beginners. There are no hazards or enemies, ensuring the first jump is not unfair, which directly respects the hard constraint. The flat pacing and absence of challenge are appropriate for a beginner segment, and the medium novelty is consistent with the brief. There are no structural or design issues that would prevent playtesting.",
+            "assessment": "The Director's recommendation is sound. The candidate level is structurally valid, matches the easy difficulty target, and provides a long safe stretch with no hazards or enemies, which is appropriate for a beginner audience seeking a fair and welcoming experience. The flat pacing and absence of challenge are suitable for an introductory segment. Medium novelty is consistent with the brief's preference. There are no hard constraint violations or remaining issues that would prevent playtesting.",
             "confidence": "high"
           },
           "round_count": 1,
@@ -187,9 +184,9 @@
             }
           ],
           "token_usage": {
-            "input_tokens": 5270,
-            "output_tokens": 474,
-            "total_tokens": 5744,
+            "input_tokens": 5218,
+            "output_tokens": 443,
+            "total_tokens": 5661,
             "requests": 4
           }
         }
@@ -198,25 +195,25 @@
         {
           "playtest_id": "U-001-pt-1",
           "candidate_id": "U-001",
-          "submitted_at": "2026-06-25T21:33:46.109229+00:00",
-          "feedback_text": "The first jump felt unfair and frustrating.",
+          "submitted_at": "2026-06-25T21:34:02.765749+00:00",
+          "feedback_text": "Looks pretty fun.",
           "feedback_result": {
-            "feedback_text": "The first jump felt unfair and frustrating.",
-            "sentiment": "negative",
+            "feedback_text": "Looks pretty fun.",
+            "sentiment": "positive",
             "model_name": "project3-tfidf-linear-svm",
             "label_source": "project3_feedback_classifier"
           },
-          "status_after_feedback": "revision_needed",
-          "warning": "Short feedback (7 words). The classifier is less reliable on short reviews and can misread short negative feedback as positive, so review the text before trusting this label.",
-          "designer_override": null
+          "status_after_feedback": "complete",
+          "warning": "Short feedback (3 words). The classifier is less reliable on short reviews and can misread short negative feedback as positive, so review the text before trusting this label.",
+          "designer_override": "negative"
         }
       ],
-      "created_at": "2026-06-25T21:33:38.881163+00:00",
-      "updated_at": "2026-06-25T21:33:46.109256+00:00",
+      "created_at": "2026-06-25T21:33:54.783482+00:00",
+      "updated_at": "2026-06-25T21:34:02.779134+00:00",
       "history": [
         {
           "event_id": "U-001-evt-1",
-          "timestamp": "2026-06-25T21:33:38.881163+00:00",
+          "timestamp": "2026-06-25T21:33:54.783482+00:00",
           "event_type": "uploaded",
           "candidate_id": "U-001",
           "summary": "Candidate U-001 created from uploaded source.",
@@ -224,20 +221,20 @@
         },
         {
           "event_id": "U-001-evt-2",
-          "timestamp": "2026-06-25T21:33:46.085420+00:00",
+          "timestamp": "2026-06-25T21:34:02.740324+00:00",
           "event_type": "triaged",
           "candidate_id": "U-001",
           "summary": "Triaged: accept_for_playtest -> ready_for_playtest.",
           "payload": {
             "action": "accept_for_playtest",
             "readiness": "ready_for_playtest",
-            "transcript_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\triage_transcripts\\demo-negative\\U-001-r1.md",
-            "report_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\triage_reports\\demo-negative\\U-001-r1.md"
+            "transcript_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\triage_transcripts\\demo-override\\U-001-r1.md",
+            "report_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\triage_reports\\demo-override\\U-001-r1.md"
           }
         },
         {
           "event_id": "U-001-evt-3",
-          "timestamp": "2026-06-25T21:33:46.097714+00:00",
+          "timestamp": "2026-06-25T21:34:02.754369+00:00",
           "event_type": "sent_to_playtest",
           "candidate_id": "U-001",
           "summary": "Candidate U-001 sent to playtest.",
@@ -245,49 +242,32 @@
         },
         {
           "event_id": "U-001-evt-4",
-          "timestamp": "2026-06-25T21:33:46.109256+00:00",
+          "timestamp": "2026-06-25T21:34:02.765775+00:00",
           "event_type": "feedback_submitted",
           "candidate_id": "U-001",
-          "summary": "Feedback classified negative -> revision_needed. Short review, flagged for designer review.",
+          "summary": "Feedback classified positive -> complete. Short review, flagged for designer review.",
           "payload": {
             "classified": true,
-            "sentiment": "negative",
+            "sentiment": "positive",
             "short_review": true
           }
-        }
-      ]
-    },
-    {
-      "candidate_id": "R-001",
-      "title": "Revision of U-001",
-      "source": "revised",
-      "level_text": "--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n----------o---------------------\n--------------------------------\n---E----------------------------\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n",
-      "level_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\candidates\\demo-negative\\R-001.txt",
-      "rendered_preview_path": null,
-      "workflow_state": "draft",
-      "parent_candidate_id": "U-001",
-      "iteration_number": 2,
-      "generation_metadata": {},
-      "triage_result": null,
-      "feedback_records": [],
-      "created_at": "2026-06-25T21:33:46.126886+00:00",
-      "updated_at": "2026-06-25T21:33:46.126886+00:00",
-      "history": [
+        },
         {
-          "event_id": "R-001-evt-1",
-          "timestamp": "2026-06-25T21:33:46.126886+00:00",
-          "event_type": "revision_created",
-          "candidate_id": "R-001",
-          "summary": "Candidate R-001 created from revised source.",
-          "payload": {}
+          "event_id": "U-001-evt-5",
+          "timestamp": "2026-06-25T21:34:02.779134+00:00",
+          "event_type": "feedback_overridden",
+          "candidate_id": "U-001",
+          "summary": "Designer overrode feedback from positive to negative -> revision_needed.",
+          "payload": {
+            "classifier_sentiment": "positive",
+            "designer_sentiment": "negative"
+          }
         }
       ]
     }
   ],
   "selected_candidate_id": null,
-  "created_at": "2026-06-25T21:33:38.866277+00:00",
-  "updated_at": "2026-06-25T21:33:46.127860+00:00",
-  "session_notes": [
-    "R-001: Reworked the first jump."
-  ]
+  "created_at": "2026-06-25T21:33:54.766760+00:00",
+  "updated_at": "2026-06-25T21:34:02.779134+00:00",
+  "session_notes": []
 }

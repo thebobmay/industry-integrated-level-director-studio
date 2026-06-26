@@ -21,12 +21,12 @@
       "triage_result": {
         "action": "accept_for_playtest",
         "readiness": "ready_for_playtest",
-        "rationale": "The candidate is structurally valid, matches the easy difficulty target, and provides a safe, frustration-free experience for beginners. There are no hazards or enemies, ensuring fairness and no frustration. Novelty is medium, which is appropriate for the brief. Pacing is flat, which is suitable for an easy, beginner segment. There are no detected spikes or structural issues.",
+        "rationale": "The candidate is structurally valid, matches the easy difficulty target, and provides a safe, frustration-free experience for beginners. There are no hazards or enemies, ensuring fairness and no frustration. The novelty is medium, which aligns with the brief. Pacing is flat, which is appropriate for a beginner segment. No difficulty spikes or structural issues are present.",
         "warnings": [],
         "revision_recommendations": [],
         "playtest_questions": [
-          "Does the lack of any challenge or hazard make the segment too uneventful, even for beginners?",
-          "Do the coin and block placements provide enough engagement for a new player?"
+          "Does the lack of any hazards or challenges make the segment too uneventful, even for beginners?",
+          "Do the coin and collectible placements provide enough engagement for new players?"
         ],
         "transcript_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\triage_transcripts\\demo-positive\\U-001-r1.md",
         "report_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\triage_reports\\demo-positive\\U-001-r1.md",
@@ -85,17 +85,17 @@
           },
           "recommendation": {
             "action": "accept_for_playtest",
-            "diagnosis": "The candidate is structurally valid, matches the easy difficulty target, and provides a safe, frustration-free experience for beginners. There are no hazards or enemies, ensuring fairness and no frustration. Novelty is medium, which is appropriate for the brief. Pacing is flat, which is suitable for an easy, beginner segment. There are no detected spikes or structural issues.",
+            "diagnosis": "The candidate is structurally valid, matches the easy difficulty target, and provides a safe, frustration-free experience for beginners. There are no hazards or enemies, ensuring fairness and no frustration. The novelty is medium, which aligns with the brief. Pacing is flat, which is appropriate for a beginner segment. No difficulty spikes or structural issues are present.",
             "tradeoff_reasoning": [
-              "The absence of hazards or enemies ensures the level is fair and not frustrating, aligning with the beginner and easy difficulty intent.",
-              "Flat pacing and a safe opening are appropriate for the target audience, as beginners benefit from a gentle introduction.",
-              "Medium novelty is sufficient given the brief's preference, and the segment is not overly derivative."
+              "The absence of hazards or enemies ensures the level is fair and not frustrating, which is ideal for beginners.",
+              "Flat pacing and a safe opening are appropriate for the easy difficulty and target audience.",
+              "Medium novelty is sufficient given the brief's preference."
             ],
             "prescription": null,
             "playtest_readiness": "ready_for_playtest",
             "playtest_questions": [
-              "Does the lack of any challenge or hazard make the segment too uneventful, even for beginners?",
-              "Do the coin and block placements provide enough engagement for a new player?"
+              "Does the lack of any hazards or challenges make the segment too uneventful, even for beginners?",
+              "Do the coin and collectible placements provide enough engagement for new players?"
             ],
             "confidence": "high"
           },
@@ -103,7 +103,7 @@
             "verdict": "approve",
             "remaining_issues": [],
             "constraint_violations": [],
-            "assessment": "The Director's recommendation is sound. The candidate level is structurally valid, matches the easy difficulty target, and is appropriate for beginners. The absence of hazards and enemies ensures fairness and avoids frustration, which aligns with the intent. Flat pacing and a safe opening are suitable for the target audience. Medium novelty is acceptable given the brief. There are no hard constraints violated, and no issues remain that would prevent playtesting.",
+            "assessment": "The Director's recommendation is sound. The candidate level is structurally valid, matches the easy difficulty target, and is appropriate for beginners. The absence of hazards and enemies ensures fairness and avoids frustration, which aligns with the intent. The flat pacing and presence of a safe opening are suitable for the target audience. Medium novelty is acceptable given the brief. There are no constraint violations or remaining issues that would prevent playtesting.",
             "confidence": "high"
           },
           "round_count": 1,
@@ -184,9 +184,9 @@
             }
           ],
           "token_usage": {
-            "input_tokens": 5230,
-            "output_tokens": 450,
-            "total_tokens": 5680,
+            "input_tokens": 5210,
+            "output_tokens": 430,
+            "total_tokens": 5640,
             "requests": 4
           }
         }
@@ -195,7 +195,7 @@
         {
           "playtest_id": "U-001-pt-1",
           "candidate_id": "U-001",
-          "submitted_at": "2026-06-18T15:07:07.899421+00:00",
+          "submitted_at": "2026-06-25T21:33:38.841703+00:00",
           "feedback_text": "Great pacing, the first jump felt fair and fun.",
           "feedback_result": {
             "feedback_text": "Great pacing, the first jump felt fair and fun.",
@@ -203,15 +203,17 @@
             "model_name": "project3-tfidf-linear-svm",
             "label_source": "project3_feedback_classifier"
           },
-          "status_after_feedback": "complete"
+          "status_after_feedback": "complete",
+          "warning": "Short feedback (9 words). The classifier is less reliable on short reviews and can misread short negative feedback as positive, so review the text before trusting this label.",
+          "designer_override": null
         }
       ],
-      "created_at": "2026-06-18T15:06:59.854345+00:00",
-      "updated_at": "2026-06-18T15:07:07.899446+00:00",
+      "created_at": "2026-06-25T21:33:30.633560+00:00",
+      "updated_at": "2026-06-25T21:33:38.841742+00:00",
       "history": [
         {
           "event_id": "U-001-evt-1",
-          "timestamp": "2026-06-18T15:06:59.854345+00:00",
+          "timestamp": "2026-06-25T21:33:30.633560+00:00",
           "event_type": "uploaded",
           "candidate_id": "U-001",
           "summary": "Candidate U-001 created from uploaded source.",
@@ -219,7 +221,7 @@
         },
         {
           "event_id": "U-001-evt-2",
-          "timestamp": "2026-06-18T15:07:07.878058+00:00",
+          "timestamp": "2026-06-25T21:33:38.808444+00:00",
           "event_type": "triaged",
           "candidate_id": "U-001",
           "summary": "Triaged: accept_for_playtest -> ready_for_playtest.",
@@ -232,7 +234,7 @@
         },
         {
           "event_id": "U-001-evt-3",
-          "timestamp": "2026-06-18T15:07:07.888642+00:00",
+          "timestamp": "2026-06-25T21:33:38.824660+00:00",
           "event_type": "sent_to_playtest",
           "candidate_id": "U-001",
           "summary": "Candidate U-001 sent to playtest.",
@@ -240,20 +242,21 @@
         },
         {
           "event_id": "U-001-evt-4",
-          "timestamp": "2026-06-18T15:07:07.899446+00:00",
+          "timestamp": "2026-06-25T21:33:38.841742+00:00",
           "event_type": "feedback_submitted",
           "candidate_id": "U-001",
-          "summary": "Feedback classified positive -> complete.",
+          "summary": "Feedback classified positive -> complete. Short review, flagged for designer review.",
           "payload": {
             "classified": true,
-            "sentiment": "positive"
+            "sentiment": "positive",
+            "short_review": true
           }
         }
       ]
     }
   ],
   "selected_candidate_id": null,
-  "created_at": "2026-06-18T15:06:59.846096+00:00",
-  "updated_at": "2026-06-18T15:07:07.899446+00:00",
+  "created_at": "2026-06-25T21:33:30.622392+00:00",
+  "updated_at": "2026-06-25T21:33:38.841742+00:00",
   "session_notes": []
 }

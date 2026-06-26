@@ -17,6 +17,10 @@ cover the five evaluation scenarios.
   feedback and a linked revision (R-001) is created from the original.
 - **demo-conflicting** (Scenario E, responsible control) , a self contradictory brief
   makes the triage agent request clarification rather than force a recommendation.
+- **demo-override** (feedback safeguards) , short playtest feedback is flagged as low
+  reliability, and the designer overrides the classifier's positive call to negative;
+  the classifier's original label is kept on the record. The event log shows the
+  feedback classification and the designer override.
 
 These were produced with the real prior project adapters. The app and the notebook can
 regenerate equivalent outputs.
