@@ -314,7 +314,7 @@ def triage_artifacts(service, session_id, candidate_id) -> dict:
 def build_report(service, session_id):
     """Generate the session report and return its text and downloadable paths."""
     if not session_id:
-        return "", None, None, "Start or load a session first."
+        return "", None, None, "", "Start or load a session first."
     path = service.build_session_report(session_id)
     session = service.load_session(session_id)
     report_text = path.read_text(encoding="utf-8")

@@ -155,7 +155,7 @@ def _limitations_section() -> str:
 def build_session_report(session: DesignSession) -> str:
     """Assemble the full Markdown session report from session state."""
     sections = [
-        f"# AI Level Director Studio Session Report",
+        "# AI Level Director Studio Session Report",
         _summary_section(session),
         _candidate_table(session),
         _state_counts_section(session),

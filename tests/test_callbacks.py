@@ -194,6 +194,17 @@ def test_build_report_callback(tmp_path):
     assert "report" in status.lower()
 
 
+def test_build_report_without_session_returns_five_values(tmp_path):
+    # The Reports button can fire with no active session; the callback must return the
+    # same 5-tuple shape so the UI unpack does not raise.
+    service = make_service(tmp_path)
+    result = cb.build_report(service, None)
+    assert len(result) == 5
+    report_text, report_path, session_json, timeline, status = result
+    assert report_path is None and session_json is None
+    assert "start or load" in status.lower()
+
+
 def test_action_without_session(tmp_path):
     service = make_service(tmp_path)
     board, ids, queue, status = cb.run_triage(service, None, "U-001")

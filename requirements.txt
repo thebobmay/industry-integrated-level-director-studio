@@ -187,9 +187,9 @@ python-dotenv==1.2.2
 python-json-logger==4.1.0
 python-multipart==0.0.32
 pytz==2026.2
-pywin32==312
-pywin32-ctypes==0.2.3
-pywinpty==3.0.5
+pywin32==312 ; sys_platform == "win32"
+pywin32-ctypes==0.2.3 ; sys_platform == "win32"
+pywinpty==3.0.5 ; sys_platform == "win32"
 PyYAML==6.0.3
 pyzmq==27.1.0
 referencing==0.37.0
