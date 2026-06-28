@@ -4,7 +4,8 @@ The layered view of AI Level Director Studio. The Gradio UI and the reproducible
 notebook both call one service facade. The facade holds the command logic, delegates
 lifecycle rules to the state machine and candidate construction to the candidate
 sources, and reaches each prior project only through an adapter. Persistence is local
-JSON and JSONL. The ASCII renderer is a display utility used by the UI and the view
+JSON and JSONL, and each triage run also saves its full deliberation transcript and a
+report for audit. The ASCII renderer is a display utility used by the UI and the view
 models, not by the service.
 
 ```mermaid
@@ -47,6 +48,7 @@ flowchart TD
     %% Artifacts
     CandidateFiles[Candidate TXT Files]
     ReportFiles[Session Report MD]
+    TriageFiles[Triage Transcript + Report<br/>Per run audit MD]
 
     %% User interactions
     Designer --> UI
@@ -85,6 +87,7 @@ flowchart TD
     Service --> Store
     Service --> EventLog
     Service --> Reports
+    Service --> TriageFiles
     Store --> CandidateFiles
     Reports --> ReportFiles
 
@@ -92,6 +95,7 @@ flowchart TD
     ViewModels --> UI
     CandidateFiles --> UI
     ReportFiles --> UI
+    TriageFiles --> UI
 ```
 
 ## Layer responsibilities
@@ -113,4 +117,5 @@ flowchart TD
   and runs. They return Project 7 domain objects, so mock and real adapters are
   interchangeable behind the `Protocol` interfaces.
 - **Persistence (`storage/`):** JSON session snapshots and an append only JSONL event
-  log, with all output paths defined in one place.
+  log, plus a per run triage transcript and report for audit, with all output paths
+  defined in one place.
