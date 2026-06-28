@@ -1,0 +1,228 @@
+{
+  "session_id": "demo-uploaded",
+  "project_name": "AI Level Director Studio",
+  "session_name": "demo-uploaded",
+  "design_brief": "A fair, beginner friendly segment. Preserve the layout.",
+  "target_difficulty": "easy",
+  "novelty_preference": null,
+  "session_status": "active",
+  "candidates": [
+    {
+      "candidate_id": "U-001",
+      "title": "Easy opener",
+      "source": "uploaded",
+      "level_text": "--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n------ooo-----------------------\n--------------------<>----------\n--------------------[]----------\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n",
+      "level_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\candidates\\demo-uploaded\\U-001.txt",
+      "rendered_preview_path": null,
+      "workflow_state": "ready_for_playtest",
+      "parent_candidate_id": null,
+      "iteration_number": 1,
+      "generation_metadata": {},
+      "triage_result": {
+        "action": "accept_for_playtest",
+        "readiness": "ready_for_playtest",
+        "rationale": "The candidate is structurally valid, matches the easy difficulty target, and provides a fully safe opening stretch with no hazards or enemies. The pacing is flat and calm, which is appropriate for a beginner-friendly, fair, and friendly segment. Novelty is measured as medium, which aligns with the brief's preference. There are no detected conflicts or spikes, and the layout is preserved as required.",
+        "warnings": [],
+        "revision_recommendations": [],
+        "playtest_questions": [
+          "Does the lack of any challenge or hazard make the segment feel too empty or unengaging for beginners, or does it serve as a good introductory stretch?"
+        ],
+        "transcript_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\triage_transcripts\\demo-uploaded\\U-001-r1.md",
+        "report_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\triage_reports\\demo-uploaded\\U-001-r1.md",
+        "raw_payload": {
+          "brief_text": "A fair, beginner friendly segment. Preserve the layout.\n\nTarget difficulty: easy.",
+          "candidate_level": "--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n--------------------------------\n------ooo-----------------------\n--------------------<>----------\n--------------------[]----------\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n",
+          "intent": {
+            "target_audience": "beginner",
+            "desired_feel": [
+              "fair",
+              "friendly"
+            ],
+            "difficulty_target": "easy",
+            "novelty_preference": "medium",
+            "hard_constraints": [
+              "preserve the layout"
+            ],
+            "soft_preferences": [
+              "beginner friendly"
+            ],
+            "detected_conflicts": []
+          },
+          "facts": {
+            "validation": {
+              "is_valid": true,
+              "warnings": [],
+              "fatal_errors": []
+            },
+            "difficulty": {
+              "difficulty_label": "easy",
+              "difficulty_score": 0.0,
+              "enemy_density": 0.0,
+              "hazard_density": 0.0,
+              "longest_gap": 0,
+              "solid_ratio": 0.1429,
+              "collectible_density": 0.0067
+            },
+            "novelty": {
+              "nearest_neighbor_similarity": 0.9167,
+              "novelty_label": "medium",
+              "warning": null
+            },
+            "pacing": {
+              "flag": "flat",
+              "opening_intensity": 0,
+              "middle_intensity": 0,
+              "final_intensity": 0,
+              "detail": "intensity opening 0, middle 0, final 0"
+            },
+            "safe_zone": {
+              "has_opening_safe_zone": true,
+              "first_challenge_column": 32,
+              "detail": "no challenge found in the segment"
+            },
+            "spike": {
+              "has_spike": false,
+              "location_column": null,
+              "detail": "no local difficulty spike found"
+            }
+          },
+          "recommendation": {
+            "action": "accept_for_playtest",
+            "diagnosis": "The candidate is structurally valid, matches the easy difficulty target, and provides a fully safe opening stretch with no hazards or enemies. The pacing is flat and calm, which is appropriate for a beginner-friendly, fair, and friendly segment. Novelty is measured as medium, which aligns with the brief's preference. There are no detected conflicts or spikes, and the layout is preserved as required.",
+            "tradeoff_reasoning": [
+              "The absence of hazards or enemies ensures the level is accessible and non-threatening for beginners, matching the intent for fairness and friendliness.",
+              "Flat pacing is appropriate for an easy, beginner segment, as it avoids overwhelming new players and provides a gentle introduction.",
+              "Medium novelty is sufficient given the brief's preference, and the segment is not flagged as derivative."
+            ],
+            "prescription": null,
+            "playtest_readiness": "ready_for_playtest",
+            "playtest_questions": [
+              "Does the lack of any challenge or hazard make the segment feel too empty or unengaging for beginners, or does it serve as a good introductory stretch?"
+            ],
+            "confidence": "high"
+          },
+          "critique": {
+            "verdict": "approve",
+            "remaining_issues": [],
+            "constraint_violations": [],
+            "assessment": "The Director's recommendation is sound. The candidate segment is structurally valid, matches the easy difficulty target, and provides a fully safe opening stretch, which is ideal for beginners. The flat pacing and absence of hazards or enemies are appropriate for the intended audience and desired feel. Medium novelty is consistent with the brief. There are no constraint violations or remaining issues that would prevent playtesting. The Director's diagnosis and reasoning are consistent with the facts and intent.",
+            "confidence": "high"
+          },
+          "round_count": 1,
+          "critic_feedback_history": [],
+          "decision": "accept_for_playtest",
+          "tool_call_log": [
+            {
+              "tool_name": "validate_candidate_level",
+              "inputs": {
+                "level": "candidate"
+              },
+              "outputs": {
+                "is_valid": true,
+                "warnings": [],
+                "fatal_errors": []
+              }
+            },
+            {
+              "tool_name": "estimate_candidate_difficulty",
+              "inputs": {
+                "level": "candidate"
+              },
+              "outputs": {
+                "difficulty_label": "easy",
+                "difficulty_score": 0.0,
+                "enemy_density": 0.0,
+                "hazard_density": 0.0,
+                "longest_gap": 0,
+                "solid_ratio": 0.1429,
+                "collectible_density": 0.0067
+              }
+            },
+            {
+              "tool_name": "measure_candidate_novelty",
+              "inputs": {
+                "level": "candidate"
+              },
+              "outputs": {
+                "nearest_neighbor_similarity": 0.9167,
+                "novelty_label": "medium",
+                "warning": null
+              }
+            },
+            {
+              "tool_name": "analyze_candidate_pacing",
+              "inputs": {
+                "level": "candidate"
+              },
+              "outputs": {
+                "flag": "flat",
+                "opening_intensity": 0,
+                "middle_intensity": 0,
+                "final_intensity": 0,
+                "detail": "intensity opening 0, middle 0, final 0"
+              }
+            },
+            {
+              "tool_name": "detect_candidate_safe_zone",
+              "inputs": {
+                "level": "candidate"
+              },
+              "outputs": {
+                "has_opening_safe_zone": true,
+                "first_challenge_column": 32,
+                "detail": "no challenge found in the segment"
+              }
+            },
+            {
+              "tool_name": "detect_candidate_spike",
+              "inputs": {
+                "level": "candidate"
+              },
+              "outputs": {
+                "has_spike": false,
+                "location_column": null,
+                "detail": "no local difficulty spike found"
+              }
+            }
+          ],
+          "token_usage": {
+            "input_tokens": 5283,
+            "output_tokens": 484,
+            "total_tokens": 5767,
+            "requests": 4
+          }
+        }
+      },
+      "feedback_records": [],
+      "created_at": "2026-06-27T22:56:53.801844+00:00",
+      "updated_at": "2026-06-27T22:57:00.759526+00:00",
+      "history": [
+        {
+          "event_id": "U-001-evt-1",
+          "timestamp": "2026-06-27T22:56:53.801844+00:00",
+          "event_type": "uploaded",
+          "candidate_id": "U-001",
+          "summary": "Candidate U-001 created from uploaded source.",
+          "payload": {}
+        },
+        {
+          "event_id": "U-001-evt-2",
+          "timestamp": "2026-06-27T22:57:00.759526+00:00",
+          "event_type": "triaged",
+          "candidate_id": "U-001",
+          "summary": "Triaged: accept_for_playtest -> ready_for_playtest.",
+          "payload": {
+            "action": "accept_for_playtest",
+            "readiness": "ready_for_playtest",
+            "transcript_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\triage_transcripts\\demo-uploaded\\U-001-r1.md",
+            "report_path": "c:\\Users\\bjm20\\Documents\\Udacity AI MBA\\Capstone\\industry-integrated-level-director-studio\\outputs\\triage_reports\\demo-uploaded\\U-001-r1.md"
+          }
+        }
+      ]
+    }
+  ],
+  "selected_candidate_id": null,
+  "created_at": "2026-06-27T22:56:53.790032+00:00",
+  "updated_at": "2026-06-27T22:57:00.759526+00:00",
+  "session_notes": []
+}

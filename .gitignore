@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Regenerated runtime outputs (keep the curated demo session and dir structure)
+outputs/sessions/*
+outputs/logs/*
+outputs/candidates/*
+outputs/rendered_levels/*
+outputs/reports/*
+outputs/triage_transcripts/*
+outputs/triage_reports/*
+!**/.gitkeep
+!outputs/demo_session/
+# Screenshots are curated submission evidence, so they are tracked.
+
+# Scratch / exploration (throwaway, never committed)
+scratch/
+
+# OS / IDE
+.DS_Store
+.vscode/
+.cursor/
+
+# Model artifacts under models/ are intentionally tracked (they fit GitHub limits).
