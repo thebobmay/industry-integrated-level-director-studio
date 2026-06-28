@@ -82,6 +82,20 @@ class PlaytestRecord(BaseModel):
     # audit trail; this records that a human disagreed.
     designer_override: FeedbackSentiment | None = None
 
+    @property
+    def decision_sentiment(self) -> str:
+        """The sentiment of record for display.
+
+        A designer override supersedes the classifier's label, so every view shows the
+        human decision rather than the model's original call. When the designer
+        overrode, the label carries an ``(override)`` marker; otherwise it is the
+        classifier's own label. The classifier label stays in ``feedback_result`` for
+        the audit trail regardless.
+        """
+        if self.designer_override and self.designer_override != self.feedback_result.sentiment:
+            return f"{self.designer_override} (override)"
+        return self.feedback_result.sentiment
+
 
 class LevelCandidate(BaseModel):
     """One candidate level segment and its full workflow state.

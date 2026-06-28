@@ -2,7 +2,13 @@
 
 from __future__ import annotations
 
-from ai_level_director.domain.models import DesignSession, LevelCandidate, TriageResult
+from ai_level_director.domain.models import (
+    DesignSession,
+    FeedbackResult,
+    LevelCandidate,
+    PlaytestRecord,
+    TriageResult,
+)
 from ai_level_director.ui.view_models import (
     BOARD_COLUMNS,
     candidate_board_view,
@@ -12,6 +18,17 @@ from ai_level_director.ui.view_models import (
 )
 
 TS = "2026-06-12T12:00:00+00:00"
+
+
+def _feedback_record(sentiment, override=None) -> PlaytestRecord:
+    return PlaytestRecord(
+        playtest_id="P-001", candidate_id="U-001", submitted_at=TS,
+        feedback_text="Looks pretty fun.",
+        feedback_result=FeedbackResult(
+            feedback_text="Looks pretty fun.", sentiment=sentiment, model_name="test",
+        ),
+        status_after_feedback="complete", designer_override=override,
+    )
 
 
 def _candidate(cid="U-001", state="draft", triage=None) -> LevelCandidate:
@@ -37,6 +54,22 @@ def test_board_view_columns_and_rows():
     assert df.iloc[0]["triage_action"] == "accept_for_playtest"
     assert df.iloc[0]["main_warning"] == "spike"
     assert df.iloc[0]["next_step"] == "Send to playtest"
+
+
+def test_board_feedback_reflects_designer_override():
+    # After the designer overrides the classifier, the board must show the decision of
+    # record, not the model's original label.
+    cand = _candidate(state="revision_needed")
+    cand.feedback_records.append(_feedback_record("positive", override="negative"))
+    df = candidate_board_view(_session([cand]))
+    assert df.iloc[0]["feedback"] == "negative (override)"
+
+
+def test_board_feedback_without_override_shows_classifier_label():
+    cand = _candidate(state="complete")
+    cand.feedback_records.append(_feedback_record("positive"))
+    df = candidate_board_view(_session([cand]))
+    assert df.iloc[0]["feedback"] == "positive"
 
 
 def test_board_view_empty_session_has_columns():

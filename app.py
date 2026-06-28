@@ -207,7 +207,7 @@ def _card_info(candidate) -> str:
             lines.append(f"Warning: {triage.warnings[0]}")
     if candidate.feedback_records:
         last = candidate.feedback_records[-1]
-        line = f"Feedback: {last.feedback_result.sentiment}"
+        line = f"Feedback: {last.decision_sentiment}"
         if last.warning:
             line += " (short review, check text)"
         lines.append(line)

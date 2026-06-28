@@ -64,10 +64,14 @@ def _main_warning(candidate: LevelCandidate) -> str:
 
 
 def _latest_feedback(candidate: LevelCandidate) -> str:
-    """Return the most recent feedback sentiment, or a dash."""
-    if candidate.feedback_records:
-        return candidate.feedback_records[-1].feedback_result.sentiment
-    return "-"
+    """Return the most recent effective feedback sentiment, or a dash.
+
+    A designer override is the decision of record, so it takes precedence over the
+    classifier's original label.
+    """
+    if not candidate.feedback_records:
+        return "-"
+    return candidate.feedback_records[-1].decision_sentiment
 
 
 def _candidate_table(session: DesignSession) -> str:
@@ -128,6 +132,10 @@ def _candidate_detail(candidate: LevelCandidate) -> str:
             lines.append(
                 f"- [{record.feedback_result.sentiment}] {record.feedback_text}"
             )
+            if record.warning:
+                lines.append(f"  - {record.warning}")
+            if record.designer_override and record.designer_override != record.feedback_result.sentiment:
+                lines.append(f"  - Designer corrected this to {record.designer_override}.")
 
     if candidate.history:
         lines += ["", "History:"]

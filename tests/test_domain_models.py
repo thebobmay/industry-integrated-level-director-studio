@@ -128,3 +128,19 @@ def test_full_session_json_round_trip():
     assert restored == session
     assert restored.candidates[0].triage_result.action == "recommend_revision"
     assert restored.candidates[0].feedback_records[0].feedback_result.sentiment == "negative"
+
+
+def test_decision_sentiment_prefers_override():
+    fb = FeedbackResult(feedback_text="Looks fun.", sentiment="positive", model_name="m")
+    record = PlaytestRecord(
+        playtest_id="PT-1", candidate_id="U-001", submitted_at=TS,
+        feedback_text="Looks fun.", feedback_result=fb, status_after_feedback="complete",
+    )
+    # No override: the classifier label is the decision of record.
+    assert record.decision_sentiment == "positive"
+    # Override: the designer's call wins, marked so it is never mistaken for the model's.
+    record.designer_override = "negative"
+    assert record.decision_sentiment == "negative (override)"
+    # An override equal to the classifier label adds no marker.
+    record.designer_override = "positive"
+    assert record.decision_sentiment == "positive"

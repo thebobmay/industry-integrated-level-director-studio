@@ -15,7 +15,7 @@
 
 | ID | Title | Source | State | Triage | Readiness | Feedback | Warning |
 |---|---|---|---|---|---|---|---|
-| U-001 | Easy opener | uploaded | revision_needed | accept_for_playtest | ready_for_playtest | positive | - |
+| U-001 | Easy opener | uploaded | revision_needed | accept_for_playtest | ready_for_playtest | negative (override) | - |
 
 ## Candidates by State
 
@@ -40,6 +40,8 @@ Playtest questions:
 
 Feedback:
 - [positive] Looks pretty fun.
+  - Short feedback (3 words). The classifier is less reliable on short reviews and can misread short negative feedback as positive, so review the text before trusting this label.
+  - Designer corrected this to negative.
 
 History:
 - 2026-06-25T21:33:54.783482+00:00 uploaded: Candidate U-001 created from uploaded source.

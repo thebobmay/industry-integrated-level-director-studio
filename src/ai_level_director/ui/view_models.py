@@ -42,10 +42,14 @@ _NEXT_STEP = {
 
 
 def _latest_feedback(candidate: LevelCandidate) -> str:
-    """Most recent feedback sentiment, or a dash."""
-    if candidate.feedback_records:
-        return candidate.feedback_records[-1].feedback_result.sentiment
-    return "-"
+    """Most recent effective feedback sentiment, or a dash.
+
+    A designer override takes precedence over the classifier label, so the board
+    shows the decision of record rather than the model's original call.
+    """
+    if not candidate.feedback_records:
+        return "-"
+    return candidate.feedback_records[-1].decision_sentiment
 
 
 def _main_warning(candidate: LevelCandidate) -> str:

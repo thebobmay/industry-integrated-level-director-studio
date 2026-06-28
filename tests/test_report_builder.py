@@ -62,6 +62,27 @@ def test_report_includes_candidate_and_triage_detail():
     assert "Localized difficulty spike detected." in report
 
 
+def test_report_reflects_designer_override(tmp_path):
+    # A designer override must show as the decision of record in the summary table and
+    # be disclosed in the candidate detail, with the classifier's label preserved.
+    service = LevelDirectorService(
+        output_root=tmp_path,
+        triage_adapter=MockTriageAdapter("accept_for_playtest"),
+        feedback_adapter=MockFeedbackAdapter(),
+    )
+    service.start_session("brief", session_id="S1")
+    service.add_uploaded_candidate("S1", LEVEL)
+    service.run_triage("S1", "U-001")
+    service.send_to_playtest("S1", "U-001")
+    service.submit_feedback("S1", "U-001", "Fun and fair!")  # short positive -> complete
+    service.override_feedback("S1", "U-001", "negative")
+
+    report = build_session_report(service.load_session("S1"))
+    assert "negative (override)" in report  # summary table shows the decision of record
+    assert "Designer corrected this to negative." in report  # detail discloses it
+    assert "[positive]" in report  # classifier's original label preserved on the record
+
+
 def test_report_always_discloses_limitations():
     # Even an empty session carries the responsible use disclosures.
     empty = DesignSession(
