@@ -21,7 +21,7 @@
       "triage_result": {
         "action": "flag_as_derivative_draft",
         "readiness": "revise_before_playtest",
-        "rationale": "The candidate is structurally valid, easy, and opens with a safe zone appropriate for beginners. However, it has extremely high similarity (1.0) to a known level, which conflicts with the hard constraint to avoid reusing existing layouts and the explicit preference for originality and high novelty.",
+        "rationale": "The candidate is structurally valid, easy, and opens with a safe zone appropriate for beginners. However, its measured novelty is low, with a perfect similarity score (1.0) to a known level, which conflicts with the hard constraint to avoid reusing existing layouts and the explicit preference for originality.",
         "warnings": [],
         "revision_recommendations": [],
         "playtest_questions": [],
@@ -39,7 +39,7 @@
               "avoid reusing existing layouts"
             ],
             "soft_preferences": [
-              "original segment"
+              "original"
             ],
             "detected_conflicts": []
           },
@@ -83,10 +83,10 @@
           },
           "recommendation": {
             "action": "flag_as_derivative_draft",
-            "diagnosis": "The candidate is structurally valid, easy, and opens with a safe zone appropriate for beginners. However, it has extremely high similarity (1.0) to a known level, which conflicts with the hard constraint to avoid reusing existing layouts and the explicit preference for originality and high novelty.",
+            "diagnosis": "The candidate is structurally valid, easy, and opens with a safe zone appropriate for beginners. However, its measured novelty is low, with a perfect similarity score (1.0) to a known level, which conflicts with the hard constraint to avoid reusing existing layouts and the explicit preference for originality.",
             "tradeoff_reasoning": [
-              "The segment is structurally sound and suitable for beginners, with a gentle opening and no difficulty spikes.",
-              "However, the measured novelty is low due to perfect similarity to a known level, directly conflicting with the intent for originality and the hard constraint against reuse."
+              "The level is structurally sound and matches the easy difficulty target for beginners, with a safe opening and no difficulty spikes.",
+              "However, the novelty check reveals it is highly derivative, directly conflicting with the intent for originality and the hard constraint against reusing layouts."
             ],
             "prescription": null,
             "playtest_readiness": "revise_before_playtest",
@@ -97,7 +97,7 @@
             "verdict": "approve",
             "remaining_issues": [],
             "constraint_violations": [],
-            "assessment": "The Director's recommendation is sound. The candidate level is structurally valid, easy, and appropriate for beginners, with a safe opening and no difficulty spikes. However, the novelty analysis shows perfect similarity to a known level, which directly violates the hard constraint to avoid reusing existing layouts and the explicit preference for originality. The Director correctly flags this as a derivative draft and recommends revision before playtest. No further issues are present, and the diagnosis is consistent with the facts and intent.",
+            "assessment": "The Director correctly identified that the candidate level, while structurally valid and appropriate for beginners in terms of difficulty and pacing, fails to meet the hard constraint and explicit intent for originality due to its perfect similarity to a known level. The recommendation to flag it as a derivative draft and require revision before playtest is sound and consistent with the facts and intent. No further issues are present beyond the already-flagged novelty violation.",
             "confidence": "high"
           },
           "round_count": 1,
@@ -178,20 +178,20 @@
             }
           ],
           "token_usage": {
-            "input_tokens": 5226,
-            "output_tokens": 416,
-            "total_tokens": 5642,
+            "input_tokens": 5227,
+            "output_tokens": 407,
+            "total_tokens": 5634,
             "requests": 4
           }
         }
       },
       "feedback_records": [],
-      "created_at": "2026-06-25T21:33:15.446161+00:00",
-      "updated_at": "2026-06-25T21:33:23.518252+00:00",
+      "created_at": "2026-06-27T22:56:47.374236+00:00",
+      "updated_at": "2026-06-27T22:56:53.773001+00:00",
       "history": [
         {
           "event_id": "U-001-evt-1",
-          "timestamp": "2026-06-25T21:33:15.446161+00:00",
+          "timestamp": "2026-06-27T22:56:47.374236+00:00",
           "event_type": "uploaded",
           "candidate_id": "U-001",
           "summary": "Candidate U-001 created from uploaded source.",
@@ -199,7 +199,7 @@
         },
         {
           "event_id": "U-001-evt-2",
-          "timestamp": "2026-06-25T21:33:23.518252+00:00",
+          "timestamp": "2026-06-27T22:56:53.773001+00:00",
           "event_type": "triaged",
           "candidate_id": "U-001",
           "summary": "Triaged: flag_as_derivative_draft -> derivative_review_needed.",
@@ -214,7 +214,7 @@
     }
   ],
   "selected_candidate_id": null,
-  "created_at": "2026-06-25T21:33:15.434857+00:00",
-  "updated_at": "2026-06-25T21:33:23.518252+00:00",
+  "created_at": "2026-06-27T22:56:47.365186+00:00",
+  "updated_at": "2026-06-27T22:56:53.773001+00:00",
   "session_notes": []
 }

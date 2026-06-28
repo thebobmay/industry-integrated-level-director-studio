@@ -8,8 +8,8 @@
 - Target difficulty: easy
 - Novelty preference: unspecified
 - Candidates: 1
-- Created: 2026-06-25T21:32:57.586052+00:00
-- Updated: 2026-06-25T21:33:15.399404+00:00
+- Created: 2026-06-27T22:56:32.515242+00:00
+- Updated: 2026-06-27T22:56:47.344493+00:00
 
 ## Candidate Summary
 
@@ -33,14 +33,14 @@
 
 **Triage:** reject_structural (readiness: not_ready)
 
-The candidate level contains a structural error: a pipe top is present without a supporting body or ground, which is a fatal integrity issue.
+The candidate level contains a structural error: a pipe top is present without a corresponding body or ground support. This is a fatal integrity issue that prevents playtesting.
 
 Warnings:
 - pipe top without a body or ground support
 
 History:
-- 2026-06-25T21:33:03.765403+00:00 generated: Candidate G-001 created from generated source.
-- 2026-06-25T21:33:15.399404+00:00 triaged: Triaged: reject_structural -> structural_rejected.
+- 2026-06-27T22:56:38.394087+00:00 generated: Candidate G-001 created from generated source.
+- 2026-06-27T22:56:47.344493+00:00 triaged: Triaged: reject_structural -> structural_rejected.
 
 ## Limitations and Responsible Use
 

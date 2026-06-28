@@ -123,12 +123,14 @@ def _override(engine, session_id, tick, cid, sentiment):
 
 
 def w_start(engine, brief, difficulty, novelty, name, tick):
+    """Start a session, toast the result, and refresh the saved session list."""
     sid, _b, _i, _q, status = cb.start_session(_get_service(engine), brief, difficulty, novelty, name)
     _toast(status)
     return sid, tick + 1, status, gr.update(choices=_list_sessions())
 
 
 def w_load(sid_choice, tick):
+    """Load a saved session into the viewer and populate the brief fields."""
     svc = _viewer_service()
     loaded_id, _b, _i, _q, status = cb.load_existing_session(svc, sid_choice)
     _toast(status)
@@ -140,58 +142,68 @@ def w_load(sid_choice, tick):
 
 
 def w_cancel(tick):
+    """Clear the active session selection and reset the brief fields."""
     _sid, _b, _i, _q, status = cb.cancel_session()
     _toast(status)
     return None, tick + 1, status, "", "unspecified", "unspecified"
 
 
 def w_refresh_sessions():
+    """Refresh the saved session dropdown choices."""
     return gr.update(choices=_list_sessions())
 
 
 def w_update_brief(sid, brief, difficulty, novelty, tick):
+    """Update the active session's brief and design targets."""
     *_, status = cb.update_brief(_viewer_service(), sid, brief, difficulty, novelty)
     _toast(status)
     return tick + 1, status
 
 
 def w_generate(engine, sid, n, temperature, seed, tick):
+    """Generate candidates with Project 5 and bump the refresh tick."""
     *_, status = cb.generate_candidates(_get_service(engine), sid, n, temperature, seed)
     _toast(status)
     return tick + 1, status
 
 
 def w_upload(engine, sid, text, title, tick):
+    """Add an uploaded candidate from pasted tile text."""
     *_, status = cb.upload_candidate(_get_service(engine), sid, text, title)
     _toast(status)
     return tick + 1, status
 
 
 def w_upload_file(engine, sid, file_path, title, tick):
+    """Add an uploaded candidate from a level text file."""
     *_, status = cb.upload_candidate_file(_get_service(engine), sid, file_path, title)
     _toast(status)
     return tick + 1, status
 
 
 def w_sample(engine, sid, sample, tick):
+    """Add a bundled sample candidate to the session."""
     *_, status = cb.load_sample(_get_service(engine), sid, sample)
     _toast(status)
     return tick + 1, status
 
 
 def w_feedback(engine, sid, cid, text, tick):
+    """Submit playtest feedback for classification by Project 3."""
     *_, status = cb.submit_feedback(_get_service(engine), sid, cid, text)
     _toast(status)
     return tick + 1, status
 
 
 def w_revise(engine, sid, parent, text, notes, tick):
+    """Create a linked revision of a candidate from new tile text."""
     *_, status = cb.create_revised_candidate(_get_service(engine), sid, parent, text, notes)
     _toast(status)
     return tick + 1, status
 
 
 def w_report(engine, sid):
+    """Build the Markdown session report and return its views."""
     report_text, report_path, session_json, timeline, status = cb.build_report(_get_service(engine), sid)
     _toast(status)
     return report_text, timeline, report_path, session_json, status

@@ -135,3 +135,7 @@ Full diagrams (system architecture, candidate lifecycle state machine, end to en
 - Core libraries: Pydantic and Pydantic AI, Gradio, PyTorch (CPU build), scikit-learn, pandas. The pinned set is in `requirements.txt`.
 - An OpenAI compatible API key is required only for live triage; mock mode runs offline.
 
+## Acknowledgements
+
+The Generative AI generator was trained on the Super Mario Bros levels in the Video Game Level Corpus (VGLC), an openly available research dataset of tile based level representations. The corpus encodes level structure, not original game art; the underlying level designs remain Nintendo's intellectual property, which is why this system treats generated output as drafts and discloses derivative risk.
+
