@@ -18,11 +18,13 @@ The target industry is independent and small team game development. These teams 
 
 The system integrates three prior capstone projects, each wrapped behind an adapter so the studio coordinates them without rewriting them.
 
-| Prior project | Role here | Adapter | Lesson carried forward |
-|---|---|---|---|
-| Generative AI (conditional Transformer level generator) | Candidate source | `Project5GeneratorAdapter` | Generated levels are drafts, not final assets; high similarity to training data is disclosed as derivative risk. |
-| Agentic AI (level design triage agent) | Triage authority | `Project6TriageAdapter` | The agent owns design judgment, not facts; it is reused unchanged and its reasoning is never duplicated. |
-| Machine Learning (player feedback classifier) | Post playtest signal | `Project3FeedbackAdapter` | The classifier is a broad reception signal, not a complete playtest analysis; it returns a label with no confidence. |
+
+| Prior project                                           | Role here            | Adapter                    | Lesson carried forward                                                                                                                                                                                                                                               |
+| ------------------------------------------------------- | -------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Generative AI (conditional Transformer level generator) | Candidate source     | `Project5GeneratorAdapter` | Generated levels are drafts, not final assets; high similarity to training data is disclosed as derivative risk.                                                                                                                                                     |
+| Agentic AI (level design triage agent)                  | Triage authority     | `Project6TriageAdapter`    | The agent owns design judgment, not facts; it is reused unchanged and its reasoning is never duplicated.                                                                                                                                                             |
+| Machine Learning (player feedback classifier)           | Post playtest signal | `Project3FeedbackAdapter`  | The classifier is a broad reception signal, not a complete playtest analysis; it returns a label with no confidence. Short feedback is flagged as low reliability, and the designer can override the classifier's label while its original call stays on the record. |
+
 
 The prior project code lives in a few places: the Agentic AI triage agent is vendored under `integrations/project6_triage/`, the Generative AI model architecture is under `src/ai_level_director/adapters/project5_model/`, and the trained Generative AI and Machine Learning model artifacts are under `models/`. Each adapter returns Project 7 domain objects, so the mock and real adapters are interchangeable.
 
@@ -44,10 +46,13 @@ integrations/project6_triage/    Agentic AI triage agent (vendored)
 data/                            Sample levels and scenarios
 models/                          Trained Generative AI and Machine Learning artifacts
 outputs/                         Sessions, logs, candidates, reports, triage transcripts
+  demo_session/                  Curated example sessions, one per evaluation scenario
 docs/architecture/               Architecture diagrams (Mermaid + rendered PNG)
 docs/Reflective_Synthesis_Paper.pdf   The reflective synthesis paper
 tests/                           Pytest suite
 ```
+
+
 
 ## How to Run
 
@@ -69,9 +74,9 @@ copy .env.example .env         # Windows  (cp on macOS or Linux)
 
 Environment variables (see `.env.example`):
 
-- `OPENAI_API_KEY` , credentials for the Agentic AI triage agent (live mode only).
-- `TRIAGE_MODEL` , model identifier for the triage agent, in provider:model form.
-- `OPENAI_BASE_URL` , optional override for a compatible provider.
+- `OPENAI_API_KEY`: credentials for the Agentic AI triage agent (live mode only).
+- `TRIAGE_MODEL`: model identifier for the triage agent, in provider:model form.
+- `OPENAI_BASE_URL`: optional override for a compatible provider.
 
 There is no offline environment switch. For a keyless run, launch `python app.py` and set the engine toggle to Mock, or run `pytest`.
 
@@ -84,6 +89,27 @@ jupyter lab          # open integrated_system_demo.ipynb for the walkthrough
 ```
 
 The Gradio app and the notebook both call the same `LevelDirectorService`, so they run the same workflow. Mock mode needs no API key and is instant, which is useful for trying the loop or running tests without cost.
+
+### Bundled sample levels for demonstration
+
+Load these from the **Bundled sample** dropdown in the app (no upload needed), then run triage:
+
+
+| Sample                | What it demonstrates                                                                                                                                                       |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `easy_opener`         | A valid easy segment that accepts for playtest. The happy path: triage, send to playtest, classify feedback, complete.                                                     |
+| `hard_segment`        | Structurally valid but reads hard (a wide pit); against an easy brief, triage recommends revision.                                                                         |
+| `derivative_draft`    | A near duplicate of a known reference level; triage catches it as derivative and routes it back. Set the session novelty preference to `original` for the clearest result. |
+| `structural_defect`   | A pipe top with no support; triage rejects it as structurally invalid before playtest.                                                                                     |
+| `beginner_excitement` | A second valid segment, useful as an alternative or a revision target.                                                                                                     |
+
+
+Two outcomes are not driven by the level:
+
+- **Clarification:** enter a self contradictory brief, for example "a relaxing beginner segment that is also brutally hard," and triage requests clarification rather than forcing a recommendation.
+- **Feedback override:** after a candidate reaches playtest, submit feedback on the Playtester tab, then override the classifier's label from the Candidate Detail tab.
+
+Triage is a live language model, so the exact action can vary between runs, but the underlying facts (validity, difficulty, novelty similarity) are deterministic.
 
 ## Architecture Overview
 
@@ -107,4 +133,5 @@ Full diagrams (system architecture, candidate lifecycle state machine, end to en
 
 - Python 3.13, CPU only.
 - Core libraries: Pydantic and Pydantic AI, Gradio, PyTorch (CPU build), scikit-learn, pandas. The pinned set is in `requirements.txt`.
-- An OpenAI compatible API key is required only for live triage; mock and cached modes run offline.
+- An OpenAI compatible API key is required only for live triage; mock mode runs offline.
+
